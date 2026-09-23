@@ -1,0 +1,9 @@
+{
+  "us_60_40": {"USA-LCB": 0.6, "USA-ITT": 0.4},
+  "mainland_60_40": {"CHN-A-CSI300": 0.6, "CHN-GOV": 0.4},
+  "hong_kong_hsi": {"HKG-HSI": 1.0},
+  "hong_kong_mainland": {"HKG-HSCEI": 1.0},
+  "combined": {"USA-LCB": 0.3, "CHN-A-CSI300": 0.2, "HKG-HSCEI": 0.1, "USA-ITT": 0.15, "CHN-GOV": 0.15, "GLO-GLD": 0.1},
+  "usd_cash": {"USA-BIL": 1.0},
+  "cny_cash": {"CHN-CASH": 1.0}
+}
