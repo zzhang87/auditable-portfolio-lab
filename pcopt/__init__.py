@@ -1,6 +1,7 @@
 """Portfolio Charts-style portfolio analytics and optimization."""
 
 from pcopt.data import load_returns_csv, portfolio_returns
+from pcopt.market_data import MarketDataset, build_market_dataset, load_market_dataset
 from pcopt.metrics import (
     MetricConfig,
     annualized_return,
@@ -9,7 +10,6 @@ from pcopt.metrics import (
     start_date_sensitivity,
     withdrawal_metrics,
 )
-from pcopt.market_data import MarketDataset, build_market_dataset, load_market_dataset
 from pcopt.optimizer import GeneticOptimizer, OptimizationResult
 from pcopt.public_data import (
     build_us_public_proxy_returns,

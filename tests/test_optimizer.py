@@ -238,9 +238,7 @@ def test_optimize_then_version_show_round_trip(tmp_path):
     )
     optimize_payload = cli.run_optimize(optimize_args)
 
-    show_args = parser.parse_args(
-        ["version-show", "--db", str(db_path), "--id", str(optimize_payload["version_id"])]
-    )
+    show_args = parser.parse_args(["version-show", "--db", str(db_path), "--id", str(optimize_payload["version_id"])])
     show_payload = cli.run_version_show(show_args)
 
     assert show_payload["name"] == "round-trip"
@@ -300,7 +298,9 @@ def test_run_optimize_closes_database_connection_when_persistence_fails(monkeypa
     monkeypatch.setattr(cli, "GeneticOptimizer", lambda **kwargs: DummyOptimizer())
     monkeypatch.setattr(cli, "open_database", lambda path: conn)
     monkeypatch.setattr(cli, "initialize_database", lambda db: None)
-    monkeypatch.setattr(cli, "create_optimizer_run", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("boom")))
+    monkeypatch.setattr(
+        cli, "create_optimizer_run", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("boom"))
+    )
 
     args = Namespace(
         returns=tmp_path / "returns.csv",

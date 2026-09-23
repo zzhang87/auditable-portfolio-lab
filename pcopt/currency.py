@@ -1,15 +1,13 @@
 """Pure annual currency conversion and inflation adjustment helpers."""
 
-from numbers import Real
 from collections.abc import Mapping, Sequence
+from numbers import Real
 
 import numpy as np
 import pandas as pd
 
 
-def annual_fx_endpoints(
-    fx_daily: pd.DataFrame, years: Sequence[int]
-) -> pd.DataFrame:
+def annual_fx_endpoints(fx_daily: pd.DataFrame, years: Sequence[int]) -> pd.DataFrame:
     """Select year-end common CNY/HKD observations within seven calendar days."""
     if not fx_daily.index.is_unique:
         raise ValueError("duplicate FX dates")
@@ -42,10 +40,7 @@ def annual_fx_endpoints(
         if isinstance(year, bool) or endpoint_year != year:
             raise ValueError(f"invalid FX endpoint year: {year}")
         boundary = pd.Timestamp(year=endpoint_year, month=12, day=31)
-        candidates = common.loc[
-            (common.index <= boundary)
-            & (common.index >= boundary - pd.Timedelta(days=7))
-        ]
+        candidates = common.loc[(common.index <= boundary) & (common.index >= boundary - pd.Timedelta(days=7))]
         if candidates.empty:
             raise ValueError(f"missing common FX endpoint for {endpoint_year}")
         row = candidates.iloc[-1]
@@ -89,23 +84,15 @@ def convert_nominal_returns(
                 numeric_return = float(ret)
             except (TypeError, ValueError, OverflowError) as exc:
                 raise ValueError(f"invalid nominal observation: {asset}/{year}") from exc
-            if (
-                isinstance(year, bool)
-                or current != year
-                or not np.isfinite(numeric_return)
-                or numeric_return <= -1
-            ):
+            if isinstance(year, bool) or current != year or not np.isfinite(numeric_return) or numeric_return <= -1:
                 raise ValueError(f"invalid nominal observation: {asset}/{year}")
             previous = current - 1
             try:
-                quotes = fx_endpoints.loc[
-                    [previous, current], [base_currency, local]
-                ]
+                quotes = fx_endpoints.loc[[previous, current], [base_currency, local]]
             except KeyError as exc:
                 raise ValueError(f"missing FX endpoint: {asset}/{year}") from exc
             if not all(
-                isinstance(value, Real) and not isinstance(value, (bool, np.bool_))
-                for value in quotes.to_numpy().flat
+                isinstance(value, Real) and not isinstance(value, (bool, np.bool_)) for value in quotes.to_numpy().flat
             ):
                 raise ValueError(f"invalid FX endpoint: {asset}/{year}")
             try:
@@ -121,9 +108,7 @@ def convert_nominal_returns(
     return out
 
 
-def deflate_returns(
-    nominal_in_base: pd.DataFrame, inflation: pd.Series
-) -> pd.DataFrame:
+def deflate_returns(nominal_in_base: pd.DataFrame, inflation: pd.Series) -> pd.DataFrame:
     """Convert nominal returns to purchasing-power returns by calendar year."""
     if not inflation.index.is_unique:
         raise ValueError("duplicate inflation years")

@@ -8,7 +8,6 @@ from pathlib import Path
 
 from pcopt.market_data import dataset_identity
 
-
 LIMITATION = "Synthetic demonstration data; not historical market evidence"
 GROWTH = [0.08, -0.04, 0.14, -0.09, 0.18, 0.11, 0.06, -0.15, 0.12, 0.09, 0.07]
 DEFENSIVE = [0.025, 0.018, 0.022, 0.015, 0.028, 0.031, -0.01, -0.06, 0.035, 0.027, 0.024]
@@ -70,33 +69,39 @@ def generate_demo_bundle(output: Path) -> None:
     write_csv(
         output / "annual_nominal.csv",
         ["year", "asset_id", "series_id", "nominal_return"],
-        [(year, asset, f"{asset}-TR", values[year - 2015])
-         for year in range(2015, 2026) for asset, values in returns.items()],
+        [
+            (year, asset, f"{asset}-TR", values[year - 2015])
+            for year in range(2015, 2026)
+            for asset, values in returns.items()
+        ],
     )
     write_csv(
-        output / "fx_daily.csv", ["date", "CNY", "HKD"],
-        [(f"{year}-12-31", cny, hkd) for year, cny, hkd in
-         zip(range(2014, 2026), CNY_PER_USD, HKD_PER_USD, strict=True)],
+        output / "fx_daily.csv",
+        ["date", "CNY", "HKD"],
+        [
+            (f"{year}-12-31", cny, hkd)
+            for year, cny, hkd in zip(range(2014, 2026), CNY_PER_USD, HKD_PER_USD, strict=True)
+        ],
     )
     write_csv(
-        output / "inflation.csv", ["year", "USD", "CNY"],
+        output / "inflation.csv",
+        ["year", "USD", "CNY"],
         list(zip(range(2015, 2026), USD_INFLATION, CNY_INFLATION, strict=True)),
     )
     evidence_path = output / "evidence.txt"
     evidence_rows = [
-        (asset, year, values[year - 2015])
-        for asset, values in returns.items() for year in (2015, 2020, 2025)
+        (asset, year, values[year - 2015]) for asset, values in returns.items() for year in (2015, 2020, 2025)
     ]
     evidence_path.write_text(
-        LIMITATION + "\nRepository-authored fixed reference values (CC0-1.0).\n"
+        LIMITATION
+        + "\nRepository-authored fixed reference values (CC0-1.0).\n"
         + "".join(f"{asset},{year},{value}\n" for asset, year, value in evidence_rows),
         encoding="utf-8",
     )
     write_csv(
         output / "references.csv",
         ["asset_id", "year", "expected_return", "absolute_tolerance", "evidence_path", "evidence_sha256"],
-        [(asset, year, value, 0.000001, "evidence.txt", sha256(evidence_path))
-         for asset, year, value in evidence_rows],
+        [(asset, year, value, 0.000001, "evidence.txt", sha256(evidence_path)) for asset, year, value in evidence_rows],
     )
     manifest = {
         "schema_version": 1,
@@ -119,14 +124,16 @@ def generate_demo_bundle(output: Path) -> None:
             name: {"path": f"{name}.csv", "sha256": sha256(output / f"{name}.csv")}
             for name in ("annual_nominal", "fx_daily", "inflation", "references")
         },
-        "raw_files": [{
-            "path": "evidence.txt",
-            "sha256": sha256(evidence_path),
-            "source_url": "synthetic://repository-authored-demo",
-            "retrieved_at": "2026-09-23T00:00:00Z",
-            "access_basis": "repository-authored CC0 synthetic values",
-            "normalization_recipe": "fixed values written without transformation",
-        }],
+        "raw_files": [
+            {
+                "path": "evidence.txt",
+                "sha256": sha256(evidence_path),
+                "source_url": "synthetic://repository-authored-demo",
+                "retrieved_at": "2026-09-23T00:00:00Z",
+                "access_basis": "repository-authored CC0 synthetic values",
+                "normalization_recipe": "fixed values written without transformation",
+            }
+        ],
         "inflation_metadata": {
             currency: {
                 "geography": geography,
@@ -148,14 +155,18 @@ def generate_demo_bundle(output: Path) -> None:
     }
     manifest["dataset_id"] = dataset_identity(manifest)
     write_json(output / "manifest.json", manifest)
-    write_json(output / "portfolio.json", {
-        "balanced_demo": {"DEMO-GROWTH": 0.6, "DEMO-DEFENSIVE": 0.4},
-    })
+    write_json(
+        output / "portfolio.json",
+        {
+            "balanced_demo": {"DEMO-GROWTH": 0.6, "DEMO-DEFENSIVE": 0.4},
+        },
+    )
     (output / "DATA_LICENSE.md").write_text(
         "# Synthetic demonstration data license\n\n"
         "The repository-authored synthetic values in this bundle are dedicated to the public "
         "domain under [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/).\n\n"
-        + LIMITATION + ". These values must not be represented as historical returns.\n",
+        + LIMITATION
+        + ". These values must not be represented as historical returns.\n",
         encoding="utf-8",
     )
 

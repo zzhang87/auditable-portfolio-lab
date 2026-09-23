@@ -3,7 +3,6 @@ import hashlib
 import json
 from pathlib import Path
 
-import pandas as pd
 import pytest
 
 
@@ -27,8 +26,7 @@ def _write_manifest(root: Path, manifest: dict) -> Path:
 def _synthetic_bundle(root: Path) -> tuple[Path, dict]:
     nominal = root / "annual_nominal.csv"
     nominal.write_text(
-        "year,asset_id,series_id,nominal_return\n"
-        "2022,US-EQ,US-EQ-TR,0.10\n2023,US-EQ,US-EQ-TR,-0.05\n",
+        "year,asset_id,series_id,nominal_return\n2022,US-EQ,US-EQ-TR,0.10\n2023,US-EQ,US-EQ-TR,-0.05\n",
         encoding="utf-8",
     )
     fx = root / "fx_daily.csv"
@@ -270,9 +268,7 @@ def test_selected_series_must_use_annual_frequency_and_typed_metadata(tmp_path):
         {"required_assets": ["UNAVAILABLE-CORE"]},
     ],
 )
-def test_every_selected_production_series_requires_three_reference_years(
-    tmp_path, coverage
-):
+def test_every_selected_production_series_requires_three_reference_years(tmp_path, coverage):
     from pcopt.market_data import load_market_dataset
 
     _, manifest = _synthetic_bundle(tmp_path)
@@ -361,7 +357,7 @@ def test_dataset_identity_excludes_only_dataset_id():
     assert dataset_identity(changed) != dataset_identity(manifest)
 
 
-@pytest.mark.parametrize("text", ['{"a": 1, "a": 2}', '{"a": NaN}', '[1, 2]'])
+@pytest.mark.parametrize("text", ['{"a": 1, "a": 2}', '{"a": NaN}', "[1, 2]"])
 def test_strict_json_rejects_duplicates_nonfinite_and_nonobject(tmp_path, text):
     from pcopt.market_data import load_strict_json
 

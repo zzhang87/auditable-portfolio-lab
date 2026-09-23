@@ -1,0 +1,67 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e ".[dev]"
+      - run: ruff check pcopt scripts tests
+      - run: ruff format --check pcopt scripts tests
+      - run: python -m build
+      - run: pcopt --help
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest -q
+
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e ".[dev,viz]"
+      - run: mkdir -p /tmp/pcopt-demo
+      - run: >-
+          pcopt benchmark
+          --manifest examples/demo/manifest.json
+          --weights examples/demo/portfolio.json
+          --base-currency both
+          --output-dir /tmp/pcopt-demo
+          --allow-synthetic-demo
+      - run: python scripts/verify_demo.py --expected examples/demo/expected --actual /tmp/pcopt-demo
+      - run: python scripts/render_demo_chart.py --report /tmp/pcopt-demo/benchmark.json --output /tmp/benchmark-overview.png
+
+  publication:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/check_publication.py

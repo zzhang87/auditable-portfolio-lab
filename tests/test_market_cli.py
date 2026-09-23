@@ -8,19 +8,17 @@ from datetime import date
 from pathlib import Path
 
 import pytest
-
 from test_market_data import _synthetic_bundle
 
 
 def _buildable_bundle(root: Path):
     import hashlib
+
     from pcopt.market_data import dataset_identity
 
     input_path, manifest = _synthetic_bundle(root)
     fx = root / "fx_daily.csv"
-    fx.write_text(
-        "date,CNY,HKD\n2021-12-31,6.80,7.79\n2022-12-30,6.90,7.80\n2023-12-29,7.10,7.81\n"
-    )
+    fx.write_text("date,CNY,HKD\n2021-12-31,6.80,7.79\n2022-12-30,6.90,7.80\n2023-12-29,7.10,7.81\n")
     manifest["input_files"]["fx_daily"]["sha256"] = hashlib.sha256(fx.read_bytes()).hexdigest()
     manifest["dataset_id"] = dataset_identity(manifest)
     input_path.write_text(json.dumps(manifest))
@@ -29,6 +27,7 @@ def _buildable_bundle(root: Path):
 
 def _production_bundle(root: Path) -> Path:
     import hashlib
+
     from pcopt.market_data import dataset_identity
 
     input_path, manifest = _buildable_bundle(root)
@@ -66,8 +65,12 @@ def test_builder_is_relocatable_and_emits_canonical_bundle(tmp_path):
     source_b = tmp_path / "elsewhere" / "source-b"
     shutil.copytree(source_a, source_b)
 
-    built_a = build_market_dataset(input_a, tmp_path / "built-a", as_of=date(2024, 6, 1), _allow_synthetic_for_tests=True)
-    built_b = build_market_dataset(source_b / "manifest.json", tmp_path / "built-b", as_of=date(2024, 6, 1), _allow_synthetic_for_tests=True)
+    built_a = build_market_dataset(
+        input_a, tmp_path / "built-a", as_of=date(2024, 6, 1), _allow_synthetic_for_tests=True
+    )
+    built_b = build_market_dataset(
+        source_b / "manifest.json", tmp_path / "built-b", as_of=date(2024, 6, 1), _allow_synthetic_for_tests=True
+    )
 
     manifest_a = json.loads(built_a.read_text())
     manifest_b = json.loads(built_b.read_text())
@@ -108,6 +111,7 @@ def test_builder_rejects_duplicate_published_filenames(tmp_path):
     entry = copy.deepcopy(manifest["raw_files"][0])
     entry["path"] = "other/evidence.txt"
     import hashlib
+
     entry["sha256"] = hashlib.sha256(duplicate.read_bytes()).hexdigest()
     manifest["raw_files"].append(entry)
     manifest["dataset_id"] = dataset_identity(manifest)
@@ -170,6 +174,7 @@ def test_builder_cutoff_is_explicit_and_excludes_as_of_year(tmp_path, monkeypatc
     nominal = source / manifest["input_files"]["annual_nominal"]["path"]
     nominal.write_text(nominal.read_text() + "2024,US-EQ,US-EQ-TR,0.07\n")
     import hashlib
+
     manifest["input_files"]["annual_nominal"]["sha256"] = hashlib.sha256(nominal.read_bytes()).hexdigest()
     manifest["series"]["US-EQ"]["last_year"] = 2024
     manifest["dataset_id"] = __import__("pcopt.market_data", fromlist=["dataset_identity"]).dataset_identity(manifest)
@@ -186,9 +191,13 @@ def test_builder_cutoff_is_explicit_and_excludes_as_of_year(tmp_path, monkeypatc
             return cls(2030, 1, 1)
 
     monkeypatch.setattr(market_data, "date", EarlierClock)
-    built = market_data.build_market_dataset(input_path, tmp_path / "built-a", as_of=date(2024, 12, 31), _allow_synthetic_for_tests=True)
+    built = market_data.build_market_dataset(
+        input_path, tmp_path / "built-a", as_of=date(2024, 12, 31), _allow_synthetic_for_tests=True
+    )
     monkeypatch.setattr(market_data, "date", LaterClock)
-    rebuilt = market_data.build_market_dataset(input_path, tmp_path / "built-b", as_of=date(2024, 12, 31), _allow_synthetic_for_tests=True)
+    rebuilt = market_data.build_market_dataset(
+        input_path, tmp_path / "built-b", as_of=date(2024, 12, 31), _allow_synthetic_for_tests=True
+    )
     result = json.loads(built.read_text())
     assert result["coverage_as_of"] == "2024-12-31"
     assert result["coverage"]["latest_complete_year"] == 2023
@@ -199,21 +208,35 @@ def test_benchmark_parser_and_legacy_commands():
     from pcopt.cli import build_parser, run_benchmark
 
     parser = build_parser()
-    args = parser.parse_args([
-        "benchmark", "--manifest", "bundle/manifest.json", "--weights", "weights.json",
-        "--base-currency", "both", "--start-year", "2001", "--end-year", "2020",
-        "--as-of", "2024-12-31", "--output-dir", "reports",
-    ])
+    args = parser.parse_args(
+        [
+            "benchmark",
+            "--manifest",
+            "bundle/manifest.json",
+            "--weights",
+            "weights.json",
+            "--base-currency",
+            "both",
+            "--start-year",
+            "2001",
+            "--end-year",
+            "2020",
+            "--as-of",
+            "2024-12-31",
+            "--output-dir",
+            "reports",
+        ]
+    )
     assert args.handler is run_benchmark
     assert (args.manifest, args.weights, args.base_currency) == (
-        Path("bundle/manifest.json"), Path("weights.json"), "both"
+        Path("bundle/manifest.json"),
+        Path("weights.json"),
+        "both",
     )
     assert (args.start_year, args.end_year) == (2001, 2020)
     assert args.as_of == date(2024, 12, 31)
     assert parser.parse_args(["version-roots"]).command == "version-roots"
-    assert parser.parse_args([
-        "optimize", "--returns", "returns.csv", "--assets", "A,B"
-    ]).objective == ["cagr=1"]
+    assert parser.parse_args(["optimize", "--returns", "returns.csv", "--assets", "A,B"]).objective == ["cagr=1"]
     with pytest.raises(SystemExit):
         parser.parse_args(["benchmark", "--base-currency", "EUR"])
 
@@ -225,18 +248,28 @@ def test_cli_report_records_runnable_paths_and_creates_no_database(tmp_path, mon
     source = tmp_path / "source"
     source.mkdir()
     input_path = _production_bundle(source)
-    market_data.build_market_dataset(
-        input_path, tmp_path / "built", as_of=date(2024, 6, 1)
-    )
+    market_data.build_market_dataset(input_path, tmp_path / "built", as_of=date(2024, 6, 1))
     weights = tmp_path / "weights.json"
     weights.write_text('{"Only US": {"US-EQ": 1.0}}\n')
     output = tmp_path / "reports"
     monkeypatch.chdir(tmp_path)
-    args = build_parser().parse_args([
-        "benchmark", "--manifest", "built/manifest.json", "--weights", "weights.json",
-        "--base-currency", "both", "--start-year", "2022", "--end-year", "2023",
-        "--output-dir", "reports",
-    ])
+    args = build_parser().parse_args(
+        [
+            "benchmark",
+            "--manifest",
+            "built/manifest.json",
+            "--weights",
+            "weights.json",
+            "--base-currency",
+            "both",
+            "--start-year",
+            "2022",
+            "--end-year",
+            "2023",
+            "--output-dir",
+            "reports",
+        ]
+    )
 
     report = run_benchmark(args)
 
@@ -268,18 +301,25 @@ def test_cli_report_redacts_external_manifest_path(tmp_path, monkeypatch):
     source = tmp_path / "source"
     source.mkdir()
     input_path = _production_bundle(source)
-    manifest = market_data.build_market_dataset(
-        input_path, tmp_path / "built", as_of=date(2024, 6, 1)
-    )
+    manifest = market_data.build_market_dataset(input_path, tmp_path / "built", as_of=date(2024, 6, 1))
     weights = tmp_path / "weights.json"
     weights.write_text('{"Only US": {"US-EQ": 1.0}}\n')
     invocation_dir = tmp_path / "invocation"
     invocation_dir.mkdir()
     monkeypatch.chdir(invocation_dir)
-    args = build_parser().parse_args([
-        "benchmark", "--manifest", str(manifest), "--weights", str(weights),
-        "--base-currency", "USD", "--output-dir", "reports",
-    ])
+    args = build_parser().parse_args(
+        [
+            "benchmark",
+            "--manifest",
+            str(manifest),
+            "--weights",
+            str(weights),
+            "--base-currency",
+            "USD",
+            "--output-dir",
+            "reports",
+        ]
+    )
 
     report = run_benchmark(args)
 
@@ -295,17 +335,24 @@ def test_automatic_boundary_reproduction_is_byte_identical(tmp_path, monkeypatch
     source = tmp_path / "source"
     source.mkdir()
     input_path = _production_bundle(source)
-    manifest = market_data.build_market_dataset(
-        input_path, tmp_path / "built", as_of=date(2024, 6, 1)
-    )
+    manifest = market_data.build_market_dataset(input_path, tmp_path / "built", as_of=date(2024, 6, 1))
     weights = tmp_path / "weights.json"
     weights.write_text('{"Only US": {"US-EQ": 1.0}}\n')
     output = tmp_path / "reports"
     monkeypatch.chdir(tmp_path)
-    args = build_parser().parse_args([
-        "benchmark", "--manifest", str(manifest), "--weights", str(weights),
-        "--base-currency", "USD", "--output-dir", str(output),
-    ])
+    args = build_parser().parse_args(
+        [
+            "benchmark",
+            "--manifest",
+            str(manifest),
+            "--weights",
+            str(weights),
+            "--base-currency",
+            "USD",
+            "--output-dir",
+            str(output),
+        ]
+    )
     report = run_benchmark(args)
     before = {path.name: path.read_bytes() for path in output.iterdir()}
 
@@ -323,7 +370,6 @@ def test_automatic_boundary_reproduction_is_byte_identical(tmp_path, monkeypatch
 
 
 def test_cli_requires_explicit_cutoff_for_raw_manifest(tmp_path):
-    import pcopt.market_data as market_data
     from pcopt.cli import build_parser, run_benchmark
 
     source = tmp_path / "source"
@@ -331,9 +377,18 @@ def test_cli_requires_explicit_cutoff_for_raw_manifest(tmp_path):
     input_path = _production_bundle(source)
     weights = tmp_path / "weights.json"
     weights.write_text('{"Only US": {"US-EQ": 1.0}}\n')
-    args = build_parser().parse_args([
-        "benchmark", "--manifest", str(input_path), "--weights", str(weights),
-        "--base-currency", "USD", "--output-dir", str(tmp_path / "reports"),
-    ])
+    args = build_parser().parse_args(
+        [
+            "benchmark",
+            "--manifest",
+            str(input_path),
+            "--weights",
+            str(weights),
+            "--base-currency",
+            "USD",
+            "--output-dir",
+            str(tmp_path / "reports"),
+        ]
+    )
     with pytest.raises(ValueError, match="--as-of.*raw"):
         run_benchmark(args)

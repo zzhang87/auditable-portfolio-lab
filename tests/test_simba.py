@@ -1,8 +1,7 @@
 import json
+import math
 import zipfile
 from pathlib import Path
-
-import math
 
 
 def _cell_ref(col: int, row: int) -> str:
@@ -30,9 +29,7 @@ def _write_minimal_simba_workbook(path: Path) -> None:
         for col_num, value in enumerate(values, start=1):
             ref = _cell_ref(col_num, row_num)
             if col_num == 1 or row_num in {1, 2, 3, 4, 5, 7}:
-                cells.append(
-                    f'<c r="{ref}" t="inlineStr"><is><t>{value}</t></is></c>'
-                )
+                cells.append(f'<c r="{ref}" t="inlineStr"><is><t>{value}</t></is></c>')
             else:
                 cells.append(f'<c r="{ref}"><v>{value}</v></c>')
         sheet_rows.append(f'<row r="{row_num}">{"".join(cells)}</row>')
@@ -40,7 +37,7 @@ def _write_minimal_simba_workbook(path: Path) -> None:
     sheet_xml = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-        f'<sheetData>{"".join(sheet_rows)}</sheetData>'
+        f"<sheetData>{''.join(sheet_rows)}</sheetData>"
         "</worksheet>"
     )
     workbook_xml = (

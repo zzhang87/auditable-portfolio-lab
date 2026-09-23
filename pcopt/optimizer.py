@@ -9,7 +9,6 @@ import pandas as pd
 from pcopt.data import portfolio_returns
 from pcopt.metrics import MetricConfig, metric_snapshot
 
-
 ConstraintSpec = tuple[str, float]
 
 

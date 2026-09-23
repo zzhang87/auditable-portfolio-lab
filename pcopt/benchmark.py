@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from datetime import date
 import hashlib
 import json
 import math
 import os
-from pathlib import Path
 import shlex
 import tempfile
+from collections.abc import Mapping, Sequence
+from datetime import date
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -21,10 +21,16 @@ from .data import portfolio_returns
 from .market_data import MarketDataset
 from .metrics import annualized_return, metric_snapshot
 
-
 CORE_ASSETS = (
-    "USA-LCB", "USA-ITT", "USA-BIL", "CHN-A-CSI300", "CHN-GOV",
-    "CHN-CASH", "HKG-HSI", "HKG-HSCEI", "GLO-GLD",
+    "USA-LCB",
+    "USA-ITT",
+    "USA-BIL",
+    "CHN-A-CSI300",
+    "CHN-GOV",
+    "CHN-CASH",
+    "HKG-HSI",
+    "HKG-HSCEI",
+    "GLO-GLD",
 )
 
 
@@ -32,9 +38,7 @@ def metric_availability(observations: int) -> dict:
     if isinstance(observations, bool) or not isinstance(observations, int) or observations < 0:
         raise ValueError("observations must be a nonnegative integer")
     rows = {}
-    for name, required in (
-        ("rolling_cagr", 10), ("start_date_sensitivity", 20), ("withdrawal", 30)
-    ):
+    for name, required in (("rolling_cagr", 10), ("start_date_sensitivity", 20), ("withdrawal", 30)):
         windows = max(0, observations - required + 1)
         item = {
             "status": "available" if windows else "unavailable",
@@ -84,9 +88,7 @@ def _select_common_years(
         raise ValueError("start_year must not exceed end_year")
     for value, name in ((start_year, "start_year"), (end_year, "end_year")):
         if value is not None and value >= as_of.year:
-            raise ValueError(
-                f"{name} must be before as-of calendar year {as_of.year}"
-            )
+            raise ValueError(f"{name} must be before as-of calendar year {as_of.year}")
     if not assets:
         raise ValueError("at least one selected asset is required")
     unknown = sorted(set(assets) - set(dataset.nominal.columns))
@@ -97,10 +99,7 @@ def _select_common_years(
         raise ValueError("currencies must contain USD and/or CNY")
 
     asset_rows = dataset.nominal.loc[:, list(dict.fromkeys(assets))]
-    availability = {
-        asset: set(asset_rows.index[asset_rows[asset].notna()].astype(int))
-        for asset in asset_rows
-    }
+    availability = {asset: set(asset_rows.index[asset_rows[asset].notna()].astype(int)) for asset in asset_rows}
     for currency in views:
         if currency not in dataset.inflation.columns:
             availability[f"{currency} CPI"] = set()
@@ -128,7 +127,9 @@ def _select_common_years(
     for year in years:
         missing = [name for name, values in availability.items() if year not in values]
         if missing:
-            qualifier = "explicit interval missing" if start_year is not None or end_year is not None else "internal gap"
+            qualifier = (
+                "explicit interval missing" if start_year is not None or end_year is not None else "internal gap"
+            )
             detail = f"{qualifier} at {year}: {', '.join(missing)}"
             if "FX endpoint pair" in missing:
                 detail += f" (FX endpoint requirement failed for {year})"
@@ -157,7 +158,9 @@ def select_common_years(
     return years
 
 
-def _validated_portfolios(dataset: MarketDataset, portfolios: Mapping[str, Mapping[str, float]]) -> dict[str, dict[str, float]]:
+def _validated_portfolios(
+    dataset: MarketDataset, portfolios: Mapping[str, Mapping[str, float]]
+) -> dict[str, dict[str, float]]:
     if not isinstance(portfolios, Mapping) or not portfolios:
         raise ValueError("at least one portfolio is required")
     output = {}
@@ -166,7 +169,11 @@ def _validated_portfolios(dataset: MarketDataset, portfolios: Mapping[str, Mappi
             raise ValueError("portfolio names and weight objects must be nonempty")
         clean = {}
         for asset, value in raw.items():
-            if isinstance(value, bool) or not isinstance(value, (int, float, np.number)) or not math.isfinite(float(value)):
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float, np.number))
+                or not math.isfinite(float(value))
+            ):
                 raise ValueError(f"portfolio {name} weights must be finite numbers")
             value = float(value)
             if value < 0:
@@ -223,7 +230,13 @@ def _excluded_ranges(
         reason = "after common complete interval; constrained by " + ", ".join(constraints)
         rows.append({"start_year": years[-1] + 1, "end_year": observed[-1], "reason": reason})
     if any(int(year) >= as_of.year for year in dataset.nominal.index):
-        rows.append({"start_year": as_of.year, "end_year": max(map(int, dataset.nominal.index)), "reason": "incomplete as-of calendar year or later"})
+        rows.append(
+            {
+                "start_year": as_of.year,
+                "end_year": max(map(int, dataset.nominal.index)),
+                "reason": "incomplete as-of calendar year or later",
+            }
+        )
     return rows
 
 
@@ -287,14 +300,27 @@ def evaluate_benchmarks(
     full_core_years = []
     if not missing_core:
         try:
-            full_core_years = select_common_years(dataset, CORE_ASSETS, ["USD", "CNY"], start_year=None, end_year=None, as_of=effective_as_of)
+            full_core_years = select_common_years(
+                dataset, CORE_ASSETS, ["USD", "CNY"], start_year=None, end_year=None, as_of=effective_as_of
+            )
         except ValueError:
             full_core_years = []
     ready = dataset.manifest.get("data_kind") == "market" and not missing_core and len(full_core_years) >= 10
     argv = [
-        "python", "-m", "pcopt.cli", "benchmark", "--manifest", "MANIFEST",
-        "--weights", "WEIGHTS", "--base-currency", base_currency, "--output-dir", "OUTPUT_DIR",
-        "--as-of", effective_as_of.isoformat(),
+        "python",
+        "-m",
+        "pcopt.cli",
+        "benchmark",
+        "--manifest",
+        "MANIFEST",
+        "--weights",
+        "WEIGHTS",
+        "--base-currency",
+        base_currency,
+        "--output-dir",
+        "OUTPUT_DIR",
+        "--as-of",
+        effective_as_of.isoformat(),
     ]
     if start_year is not None:
         argv.extend(["--start-year", str(start_year)])
@@ -314,8 +340,11 @@ def evaluate_benchmarks(
         "dataset_id": dataset.manifest.get("dataset_id"),
         "data_kind": dataset.manifest.get("data_kind"),
         "evaluation": {
-            "as_of": effective_as_of.isoformat(), "years": years,
-            "start_year": years[0], "end_year": years[-1], "observations": len(years),
+            "as_of": effective_as_of.isoformat(),
+            "years": years,
+            "start_year": years[0],
+            "end_year": years[-1],
+            "observations": len(years),
             "excluded_ranges": _excluded_ranges(
                 dataset,
                 years,
@@ -340,8 +369,7 @@ def evaluate_benchmarks(
                 "metadata": dataset.manifest.get("inflation_metadata", {}),
                 "selected_observations": {
                     currency: [
-                        {"year": int(year), "inflation": float(dataset.inflation.at[year, currency])}
-                        for year in years
+                        {"year": int(year), "inflation": float(dataset.inflation.at[year, currency])} for year in years
                     ]
                     for currency in currencies
                 },
@@ -382,46 +410,63 @@ def _metric_or_reason(item: dict, key: str, availability_key: str) -> str:
     if value is not None:
         return _percent(value)
     availability = item["availability"][availability_key]
-    return f"Unavailable: {availability.get('reason', 'not calculated')} ({availability['available_years']}/{availability['required_years']} years)"
+    return (
+        f"Unavailable: {availability.get('reason', 'not calculated')} "
+        f"({availability['available_years']}/{availability['required_years']} years)"
+    )
 
 
 def render_benchmark_markdown(report: dict) -> str:
     years = report["evaluation"]["years"]
     lines = [
-        "# Fixed-allocation benchmark report", "",
+        "# Fixed-allocation benchmark report",
+        "",
         f"Dataset: `{_escape(report['dataset_id'])}`  ",
         f"Evaluation years: {years[0]}–{years[-1]} ({len(years)} complete annual observations)  ",
         "Risk sampling: Year-end risk from annual observations.  ",
-        f"Readiness: **{_escape(report['readiness']['status'])}**", "",
-        "## Portfolio definitions", "",
-        "| Portfolio | Weights | Series IDs |", "|---|---|---|",
+        f"Readiness: **{_escape(report['readiness']['status'])}**",
+        "",
+        "## Portfolio definitions",
+        "",
+        "| Portfolio | Weights | Series IDs |",
+        "|---|---|---|",
     ]
     definitions = next(iter(report["views"].values()))["portfolios"]
     series = report["source_assumptions"]["series"]
     for name, item in definitions.items():
         weights = "; ".join(f"{asset}: {weight:.2%}" for asset, weight in item["weights"].items())
-        series_ids = "; ".join(
-            f"{asset}: {series.get(asset, {}).get('series_id', '')}" for asset in item["weights"]
-        )
+        series_ids = "; ".join(f"{asset}: {series.get(asset, {}).get('series_id', '')}" for asset in item["weights"])
         lines.append(f"| {_escape(name)} | {_escape(weights)} | {_escape(series_ids)} |")
     lines.append("")
     for currency, view in report["views"].items():
-        lines.extend([
-            f"## {currency} purchasing-power view", "",
-            "| Portfolio | Nominal cumulative return | Real cumulative return | Nominal CAGR | Real CAGR | Real volatility | Deepest drawdown | Ulcer index |",
-            "|---|---:|---:|---:|---:|---:|---:|---:|",
-        ])
+        lines.extend(
+            [
+                f"## {currency} purchasing-power view",
+                "",
+                "| Portfolio | Nominal cumulative return | Real cumulative return | Nominal CAGR | Real CAGR | "
+                "Real volatility | Deepest drawdown | Ulcer index |",
+                "|---|---:|---:|---:|---:|---:|---:|---:|",
+            ]
+        )
         for name, item in view["portfolios"].items():
             metrics = item["metrics"]["real"]
             lines.append(
-                f"| {_escape(name)} | {_percent(item['nominal_cumulative_return'])} | {_percent(item['real_cumulative_return'])} | "
+                f"| {_escape(name)} | {_percent(item['nominal_cumulative_return'])} | "
+                f"{_percent(item['real_cumulative_return'])} | "
                 f"{_percent(item['nominal_cagr'])} | {_percent(item['real_cagr'])} | "
                 f"{_percent(metrics.get('standard_deviation'))} | {_percent(metrics.get('deepest_drawdown'))} | "
                 f"{_percent(metrics.get('ulcer_index'))} |"
             )
-        lines.extend(["", "### Horizon metrics", "",
-                      "| Portfolio | Windows (10y / 20y / 30y) | Rolling CAGR min / 15th / median / 85th / max | Start-date sensitivity | SWR / PWR / LTWR |",
-                      "|---|---|---|---|---|"])
+        lines.extend(
+            [
+                "",
+                "### Horizon metrics",
+                "",
+                "| Portfolio | Windows (10y / 20y / 30y) | Rolling CAGR min / 15th / median / 85th / max | "
+                "Start-date sensitivity | SWR / PWR / LTWR |",
+                "|---|---|---|---|---|",
+            ]
+        )
         for name, item in view["portfolios"].items():
             metrics = item["metrics"]["real"]
             available = item["availability"]
@@ -430,21 +475,60 @@ def render_benchmark_markdown(report: dict) -> str:
                 f"20y: {available['start_date_sensitivity']['windows']}; "
                 f"30y: {available['withdrawal']['windows']}"
             )
-            rolling = " / ".join(_percent(metrics.get(key)) for key in (
-                "rolling_cagr_min", "rolling_cagr_baseline", "rolling_cagr_median",
-                "rolling_cagr_stretch", "rolling_cagr_max",
-            )) if "rolling_cagr_min" in metrics else _metric_or_reason(item, "rolling_cagr_min", "rolling_cagr")
+            rolling = (
+                " / ".join(
+                    _percent(metrics.get(key))
+                    for key in (
+                        "rolling_cagr_min",
+                        "rolling_cagr_baseline",
+                        "rolling_cagr_median",
+                        "rolling_cagr_stretch",
+                        "rolling_cagr_max",
+                    )
+                )
+                if "rolling_cagr_min" in metrics
+                else _metric_or_reason(item, "rolling_cagr_min", "rolling_cagr")
+            )
             sensitivity = _metric_or_reason(item, "start_date_sensitivity", "start_date_sensitivity")
-            withdrawals = " / ".join(_percent(metrics.get(key)) for key in (
-                "safe_withdrawal_rate", "perpetual_withdrawal_rate", "long_term_withdrawal_rate",
-            )) if "safe_withdrawal_rate" in metrics else _metric_or_reason(item, "safe_withdrawal_rate", "withdrawal")
-            lines.append(f"| {_escape(name)} | {windows} | {_escape(rolling)} | {_escape(sensitivity)} | {_escape(withdrawals)} |")
-        lines.extend(["", "Rolling CAGR values are min / 15th percentile / median / 85th percentile / max. Withdrawal values are SWR / PWR / LTWR. Windows are overlapping.", ""])
+            withdrawals = (
+                " / ".join(
+                    _percent(metrics.get(key))
+                    for key in (
+                        "safe_withdrawal_rate",
+                        "perpetual_withdrawal_rate",
+                        "long_term_withdrawal_rate",
+                    )
+                )
+                if "safe_withdrawal_rate" in metrics
+                else _metric_or_reason(item, "safe_withdrawal_rate", "withdrawal")
+            )
+            lines.append(
+                f"| {_escape(name)} | {windows} | {_escape(rolling)} | {_escape(sensitivity)} | "
+                f"{_escape(withdrawals)} |"
+            )
+        lines.extend(
+            [
+                "",
+                "Rolling CAGR values are min / 15th percentile / median / 85th percentile / max. "
+                "Withdrawal values are SWR / PWR / LTWR. Windows are overlapping.",
+                "",
+            ]
+        )
     fx = report.get("provenance", {}).get("fx", {})
-    lines.extend(["## FX and inflation provenance", "", f"FX metadata: {_escape(_compact(fx.get('metadata', {})))}", "",
-                  "| Endpoint year | Observed date | CNY per USD | HKD per USD |", "|---:|---|---:|---:|"])
+    lines.extend(
+        [
+            "## FX and inflation provenance",
+            "",
+            f"FX metadata: {_escape(_compact(fx.get('metadata', {})))}",
+            "",
+            "| Endpoint year | Observed date | CNY per USD | HKD per USD |",
+            "|---:|---|---:|---:|",
+        ]
+    )
     for endpoint in fx.get("selected_endpoints", []):
-        lines.append(f"| {endpoint['year']} | {endpoint['observed_date']} | {endpoint['CNY']:.6g} | {endpoint['HKD']:.6g} |")
+        lines.append(
+            f"| {endpoint['year']} | {endpoint['observed_date']} | {endpoint['CNY']:.6g} | {endpoint['HKD']:.6g} |"
+        )
     inflation = report.get("provenance", {}).get("inflation", {})
     lines.extend(["", f"Inflation metadata: {_escape(_compact(inflation.get('metadata', {})))}", ""])
     for currency, observations in inflation.get("selected_observations", {}).items():
@@ -461,13 +545,25 @@ def render_benchmark_markdown(report: dict) -> str:
         lines.append(f"| {_escape(key)} | {_escape(_compact(value))} |")
     readiness = report["readiness"]
     lines.append(f"| Missing core assets | {_escape('; '.join(readiness['missing_core_assets']) or 'None')} |")
-    lines.append(f"| Full core universe shared years | {readiness['complete_shared_years']} / {readiness['minimum_complete_shared_years']} required |")
-    lines.extend(["", "## Source, fee, and backfill caveats", "", "| Asset | Source | Fee basis | Fee notes | Backfill | Limitations |", "|---|---|---|---|---|---|"])
+    lines.append(
+        f"| Full core universe shared years | {readiness['complete_shared_years']} / "
+        f"{readiness['minimum_complete_shared_years']} required |"
+    )
+    lines.extend(
+        [
+            "",
+            "## Source, fee, and backfill caveats",
+            "",
+            "| Asset | Source | Fee basis | Fee notes | Backfill | Limitations |",
+            "|---|---|---|---|---|---|",
+        ]
+    )
     for asset, metadata in report["source_assumptions"]["series"].items():
         limits = "; ".join(metadata.get("limitations", []))
         lines.append(
-            f"| {_escape(asset)} | {_escape(metadata.get('source_id', ''))} | {_escape(metadata.get('fee_basis', ''))} | "
-            f"{_escape(metadata.get('fee_notes', ''))} | {_escape(metadata.get('backfill_start_date') or 'none declared')} | {_escape(limits)} |"
+            f"| {_escape(asset)} | {_escape(metadata.get('source_id', ''))} | "
+            f"{_escape(metadata.get('fee_basis', ''))} | {_escape(metadata.get('fee_notes', ''))} | "
+            f"{_escape(metadata.get('backfill_start_date') or 'none declared')} | {_escape(limits)} |"
         )
     lines.extend(["", "## Excluded years", ""])
     excluded = report["evaluation"]["excluded_ranges"]
@@ -498,9 +594,7 @@ def _atomic_write(path: Path, content: bytes) -> None:
         raise
 
 
-def write_benchmark_report(
-    report: dict, output_dir: str | Path, *, allow_synthetic_demo: bool = False
-) -> None:
+def write_benchmark_report(report: dict, output_dir: str | Path, *, allow_synthetic_demo: bool = False) -> None:
     if report.get("data_kind") != "market" and not allow_synthetic_demo:
         raise ValueError("synthetic datasets require explicit demo opt-in")
     root = Path(output_dir)

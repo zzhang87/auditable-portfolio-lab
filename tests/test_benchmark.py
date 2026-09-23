@@ -1,57 +1,84 @@
-from datetime import date
 import json
+from datetime import date
 
 import pandas as pd
 import pytest
 
 from pcopt.market_data import MarketDataset
 
-
 CORE = [
-    "USA-LCB", "USA-ITT", "USA-BIL", "CHN-A-CSI300", "CHN-GOV",
-    "CHN-CASH", "HKG-HSI", "HKG-HSCEI", "GLO-GLD",
+    "USA-LCB",
+    "USA-ITT",
+    "USA-BIL",
+    "CHN-A-CSI300",
+    "CHN-GOV",
+    "CHN-CASH",
+    "HKG-HSI",
+    "HKG-HSCEI",
+    "GLO-GLD",
 ]
 
 
 def _dataset(*, years=range(2010, 2025), missing=None, data_kind="synthetic_test"):
     years = list(years)
     nominal = pd.DataFrame(
-        {asset: [0.04 + (i % 4) * 0.01 + position * 0.001 for i in range(len(years))]
-         for position, asset in enumerate(CORE)},
+        {
+            asset: [0.04 + (i % 4) * 0.01 + position * 0.001 for i in range(len(years))]
+            for position, asset in enumerate(CORE)
+        },
         index=years,
     )
     if missing:
         nominal.loc[missing[1], missing[0]] = float("nan")
     fx_years = range(min(years) - 1, max(years) + 1)
     fx = pd.DataFrame(
-        {"CNY": [6.7 + 0.02 * i for i, _ in enumerate(fx_years)],
-         "HKD": [7.75 + 0.003 * i for i, _ in enumerate(fx_years)]},
+        {
+            "CNY": [6.7 + 0.02 * i for i, _ in enumerate(fx_years)],
+            "HKD": [7.75 + 0.003 * i for i, _ in enumerate(fx_years)],
+        },
         index=pd.to_datetime([f"{year}-12-31" for year in fx_years]),
     )
-    inflation = pd.DataFrame(
-        {"USD": [0.02] * len(years), "CNY": [0.025] * len(years)}, index=years
-    )
+    inflation = pd.DataFrame({"USD": [0.02] * len(years), "CNY": [0.025] * len(years)}, index=years)
     currencies = {
-        asset: ("CNY" if asset.startswith("CHN") else "HKD" if asset.startswith("HKG") else "USD")
-        for asset in CORE
+        asset: ("CNY" if asset.startswith("CHN") else "HKD" if asset.startswith("HKG") else "USD") for asset in CORE
     }
     series = {
         asset: {
-            "asset_id": asset, "currency": currencies[asset], "source_id": "synthetic",
-            "fee_basis": "gross_of_fund_fees", "fee_notes": "Synthetic | test\nonly",
-            "backfill_start_date": None, "limitations": ["Synthetic test data only"],
+            "asset_id": asset,
+            "currency": currencies[asset],
+            "source_id": "synthetic",
+            "fee_basis": "gross_of_fund_fees",
+            "fee_notes": "Synthetic | test\nonly",
+            "backfill_start_date": None,
+            "limitations": ["Synthetic test data only"],
         }
         for asset in CORE
     }
     manifest = {
-        "schema_version": 1, "dataset_id": "synthetic-id", "data_kind": data_kind,
+        "schema_version": 1,
+        "dataset_id": "synthetic-id",
+        "data_kind": data_kind,
         "series": series,
         "coverage": {"required_assets": ["USA-LCB"], "minimum_shared_years": 1},
         "coverage_as_of": "2026-09-19",
-        "fx_metadata": {"quote_orientation": "units_per_USD", "observation_timing": "close", "series": {"CNY": "observed", "HKD": "observed"}},
+        "fx_metadata": {
+            "quote_orientation": "units_per_USD",
+            "observation_timing": "close",
+            "series": {"CNY": "observed", "HKD": "observed"},
+        },
         "inflation_metadata": {
-            "USD": {"geography": "United States", "seasonal_adjustment": "not seasonally adjusted", "units": "decimal_change", "basis": "December-over-December"},
-            "CNY": {"geography": "China", "seasonal_adjustment": "not seasonally adjusted", "units": "decimal_change", "basis": "December-over-December"},
+            "USD": {
+                "geography": "United States",
+                "seasonal_adjustment": "not seasonally adjusted",
+                "units": "decimal_change",
+                "basis": "December-over-December",
+            },
+            "CNY": {
+                "geography": "China",
+                "seasonal_adjustment": "not seasonally adjusted",
+                "units": "decimal_change",
+                "basis": "December-over-December",
+            },
         },
         "assumptions": ["Annual rebalancing", "No taxes"],
     }
@@ -71,8 +98,11 @@ def test_metric_availability_counts_full_windows():
     assert result["rolling_cagr"]["windows"] == 6
     assert result["rolling_cagr"]["overlapping"] is True
     assert result["withdrawal"] == {
-        "status": "unavailable", "required_years": 30, "available_years": 15,
-        "windows": 0, "overlapping": True,
+        "status": "unavailable",
+        "required_years": 30,
+        "available_years": 15,
+        "windows": 0,
+        "overlapping": True,
         "reason": "insufficient complete annual observations",
     }
 
@@ -92,7 +122,10 @@ def test_both_views_share_exact_years_weights_and_hand_checked_conversion():
     assert report["views"]["USD"]["portfolios"]["global"]["availability"]["withdrawal"]["status"] == "unavailable"
     assert report["evaluation"]["as_of"] == "2026-01-01"
     assert report["provenance"]["fx"]["selected_endpoints"][0] == {
-        "year": 2009, "observed_date": "2009-12-31", "CNY": 6.7, "HKD": 7.75,
+        "year": 2009,
+        "observed_date": "2009-12-31",
+        "CNY": 6.7,
+        "HKD": 7.75,
     }
     assert report["provenance"]["fx"]["metadata"]["quote_orientation"] == "units_per_USD"
     assert report["provenance"]["inflation"]["metadata"]["CNY"]["geography"] == "China"
@@ -123,18 +156,23 @@ def test_common_year_selection_rejects_internal_gap_and_exact_shortening():
 
     dataset = _dataset(missing=("USA-LCB", 2017))
     with pytest.raises(ValueError, match="internal gap.*2017"):
-        select_common_years(dataset, ["USA-LCB"], ["USD", "CNY"], start_year=None, end_year=None, as_of=date(2026, 1, 1))
+        select_common_years(
+            dataset, ["USA-LCB"], ["USD", "CNY"], start_year=None, end_year=None, as_of=date(2026, 1, 1)
+        )
     with pytest.raises(ValueError, match="explicit.*2017"):
         select_common_years(dataset, ["USA-LCB"], ["USD"], start_year=2015, end_year=2019, as_of=date(2026, 1, 1))
 
 
-@pytest.mark.parametrize("weights, message", [
-    ({"USA-LCB": float("nan")}, "finite"),
-    ({"USA-LCB": -0.1, "USA-ITT": 1.1}, "nonnegative"),
-    ({"USA-LCB": 0.4}, "sum to one"),
-    ({"USA-LCB": 0.0}, "zero"),
-    ({"UNKNOWN": 1.0}, "unknown asset"),
-])
+@pytest.mark.parametrize(
+    "weights, message",
+    [
+        ({"USA-LCB": float("nan")}, "finite"),
+        ({"USA-LCB": -0.1, "USA-ITT": 1.1}, "nonnegative"),
+        ({"USA-LCB": 0.4}, "sum to one"),
+        ({"USA-LCB": 0.0}, "zero"),
+        ({"UNKNOWN": 1.0}, "unknown asset"),
+    ],
+)
 def test_invalid_weights_are_rejected(weights, message):
     from pcopt.benchmark import evaluate_benchmarks
 
@@ -146,7 +184,13 @@ def test_readiness_requires_full_fixed_core_universe_despite_coverage_metadata()
     from pcopt.benchmark import evaluate_benchmarks
 
     dataset = _dataset()
-    dataset = MarketDataset(dataset.manifest, dataset.nominal.drop(columns="HKG-HSCEI"), dataset.fx_daily, dataset.inflation, dataset.references)
+    dataset = MarketDataset(
+        dataset.manifest,
+        dataset.nominal.drop(columns="HKG-HSCEI"),
+        dataset.fx_daily,
+        dataset.inflation,
+        dataset.references,
+    )
     report = evaluate_benchmarks(dataset, {"us": {"USA-LCB": 1.0}}, base_currency="USD", as_of=date(2026, 1, 1))
     assert report["readiness"]["status"] == "incomplete"
     assert "HKG-HSCEI" in report["readiness"]["missing_core_assets"]
@@ -184,9 +228,7 @@ def test_markdown_renders_available_long_horizon_metrics_and_coverage_reasons():
     from pcopt.benchmark import evaluate_benchmarks, render_benchmark_markdown
 
     dataset = _dataset(years=range(1985, 2025))
-    dataset.manifest["coverage"]["unavailable_assets"] = {
-        "HKG-HSCEI": "usable total-return history was not acquired"
-    }
+    dataset.manifest["coverage"]["unavailable_assets"] = {"HKG-HSCEI": "usable total-return history was not acquired"}
     report = evaluate_benchmarks(
         dataset,
         {"Arbitrary retirement mix": {"USA-LCB": 0.7, "USA-ITT": 0.3}},
@@ -204,7 +246,9 @@ def test_stale_fx_and_current_incomplete_year_are_rejected_or_excluded():
     from pcopt.benchmark import select_common_years
 
     dataset = _dataset(years=range(2023, 2027))
-    assert select_common_years(dataset, ["USA-LCB"], ["USD"], start_year=None, end_year=None, as_of=date(2026, 9, 19)) == [2023, 2024, 2025]
+    assert select_common_years(
+        dataset, ["USA-LCB"], ["USD"], start_year=None, end_year=None, as_of=date(2026, 9, 19)
+    ) == [2023, 2024, 2025]
     stale = dataset.fx_daily.drop(pd.Timestamp("2024-12-31"))
     dataset = MarketDataset(dataset.manifest, dataset.nominal, stale, dataset.inflation, dataset.references)
     with pytest.raises(ValueError, match="FX endpoint.*2024"):

@@ -9,10 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from pcopt.simba import write_simba_proxy_returns
-
 
 def main() -> None:
+    from pcopt.simba import write_simba_proxy_returns
+
     parser = argparse.ArgumentParser(description="Build Portfolio Charts-style proxy data from Simba workbook.")
     parser.add_argument(
         "--workbook",

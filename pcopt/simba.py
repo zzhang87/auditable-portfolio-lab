@@ -9,7 +9,6 @@ from xml.etree import ElementTree as ET
 
 import pandas as pd
 
-
 MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
 OFFICE_REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -99,11 +98,7 @@ def load_simba_data_series(workbook_path: str | Path, sheet_name: str = "Data_Se
     if 1 not in rows:
         raise ValueError(f"{sheet_name!r} is missing header row 1")
 
-    headers = {
-        col: str(value).strip()
-        for col, value in rows[1].items()
-        if col > 1 and str(value).strip()
-    }
+    headers = {col: str(value).strip() for col, value in rows[1].items() if col > 1 and str(value).strip()}
     metadata: dict[str, dict[str, object]] = {}
     for col, name in headers.items():
         metadata[name] = {

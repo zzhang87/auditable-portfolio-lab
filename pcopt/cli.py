@@ -118,7 +118,8 @@ def build_parser() -> argparse.ArgumentParser:
     benchmark.add_argument("--start-year", type=int)
     benchmark.add_argument("--end-year", type=int)
     benchmark.add_argument(
-        "--as-of", type=parse_date,
+        "--as-of",
+        type=parse_date,
         help="Qualification cutoff (required for raw manifests; built bundles default to coverage_as_of)",
     )
     benchmark.add_argument("--output-dir", required=True, type=Path)

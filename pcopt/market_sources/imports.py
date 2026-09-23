@@ -22,9 +22,7 @@ def annual_returns_from_levels(levels: pd.Series, *, as_of: date) -> pd.DataFram
     completed = numeric[numeric.index.year < as_of.year].sort_index()
     endpoints = completed.groupby(completed.index.year).tail(1)
     if endpoints.empty:
-        return pd.DataFrame(
-            columns=["nominal_return", "start_observed_date", "end_observed_date"]
-        ).rename_axis("year")
+        return pd.DataFrame(columns=["nominal_return", "start_observed_date", "end_observed_date"]).rename_axis("year")
 
     years = endpoints.index.year.to_numpy()
     if len(years) > 1 and not np.all(np.diff(years) == 1):
@@ -45,7 +43,11 @@ def annual_returns_from_levels(levels: pd.Series, *, as_of: date) -> pd.DataFram
                 "end_observed_date": endpoints.index[position].date(),
             }
         )
-    return pd.DataFrame.from_records(records).set_index("year") if records else pd.DataFrame(
-        columns=["nominal_return", "start_observed_date", "end_observed_date"],
-        index=pd.Index([], name="year"),
+    return (
+        pd.DataFrame.from_records(records).set_index("year")
+        if records
+        else pd.DataFrame(
+            columns=["nominal_return", "start_observed_date", "end_observed_date"],
+            index=pd.Index([], name="year"),
+        )
     )

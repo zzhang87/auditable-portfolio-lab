@@ -68,9 +68,7 @@ def test_annual_fx_endpoints_uses_observed_changing_hkd():
 def test_annual_fx_endpoints_rejects_eight_day_old_quote():
     from pcopt.currency import annual_fx_endpoints
 
-    daily = pd.DataFrame(
-        {"CNY": [7.0], "HKD": [7.8]}, index=pd.to_datetime(["2025-12-23"])
-    )
+    daily = pd.DataFrame({"CNY": [7.0], "HKD": [7.8]}, index=pd.to_datetime(["2025-12-23"]))
     with pytest.raises(ValueError, match="missing common FX endpoint for 2025"):
         annual_fx_endpoints(daily, [2025])
 
@@ -127,9 +125,7 @@ def test_cross_currency_round_trip_recovers_original_growth_factor():
 
     usd = pd.DataFrame({"asset": [0.23]}, index=[2025])
     in_cny = convert_nominal_returns(usd, {"asset": "USD"}, _fx_endpoints(), "CNY")
-    back_to_usd = convert_nominal_returns(
-        in_cny, {"asset": "CNY"}, _fx_endpoints(), "USD"
-    )
+    back_to_usd = convert_nominal_returns(in_cny, {"asset": "CNY"}, _fx_endpoints(), "USD")
     assert back_to_usd.loc[2025, "asset"] == pytest.approx(0.23)
 
 
@@ -146,27 +142,21 @@ def test_common_weight_portfolio_conversion_matches_asset_conversions():
 
     local = pd.DataFrame({"A": [0.10], "B": [-0.05]}, index=[2025])
     weights = pd.Series({"A": 0.4, "B": 0.6})
-    converted_assets = convert_nominal_returns(
-        local, {"A": "USD", "B": "USD"}, _fx_endpoints(), "CNY"
-    )
+    converted_assets = convert_nominal_returns(local, {"A": "USD", "B": "USD"}, _fx_endpoints(), "CNY")
     converted_portfolio = convert_nominal_returns(
         pd.DataFrame({"portfolio": [(local.loc[2025] * weights).sum()]}, index=[2025]),
         {"portfolio": "USD"},
         _fx_endpoints(),
         "CNY",
     )
-    assert (converted_assets.loc[2025] * weights).sum() == pytest.approx(
-        converted_portfolio.loc[2025, "portfolio"]
-    )
+    assert (converted_assets.loc[2025] * weights).sum() == pytest.approx(converted_portfolio.loc[2025, "portfolio"])
 
 
 def test_conversion_rejects_missing_currency_mapping():
     from pcopt.currency import convert_nominal_returns
 
     with pytest.raises(ValueError, match="missing currency mapping for US"):
-        convert_nominal_returns(
-            pd.DataFrame({"US": [0.1]}, index=[2025]), {}, _fx_endpoints(), "USD"
-        )
+        convert_nominal_returns(pd.DataFrame({"US": [0.1]}, index=[2025]), {}, _fx_endpoints(), "USD")
 
 
 def test_conversion_rejects_missing_previous_year_fx():
@@ -186,9 +176,7 @@ def test_conversion_rejects_duplicate_return_and_fx_years():
 
     duplicate_returns = pd.DataFrame({"US": [0.1, 0.2]}, index=[2025, 2025])
     with pytest.raises(ValueError, match="duplicate return years"):
-        convert_nominal_returns(
-            duplicate_returns, {"US": "USD"}, _fx_endpoints(), "USD"
-        )
+        convert_nominal_returns(duplicate_returns, {"US": "USD"}, _fx_endpoints(), "USD")
     duplicate_fx = pd.concat([_fx_endpoints(), _fx_endpoints().loc[[2025]]])
     with pytest.raises(ValueError, match="duplicate FX years"):
         convert_nominal_returns(

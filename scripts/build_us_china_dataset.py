@@ -10,10 +10,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from pcopt.market_data import build_market_dataset
-
 
 def main() -> None:
+    from pcopt.market_data import build_market_dataset
+
     parser = argparse.ArgumentParser(description="Build a qualified market dataset offline")
     parser.add_argument("--inputs", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)

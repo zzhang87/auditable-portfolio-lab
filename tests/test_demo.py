@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-
 DEMO = Path("examples/demo")
 
 
@@ -15,9 +14,15 @@ def _benchmark_args(output, *, bundle=DEMO, allow=True):
     from pcopt.cli import build_parser
 
     argv = [
-        "benchmark", "--manifest", str(bundle / "manifest.json"),
-        "--weights", str(bundle / "portfolio.json"),
-        "--base-currency", "both", "--output-dir", str(output),
+        "benchmark",
+        "--manifest",
+        str(bundle / "manifest.json"),
+        "--weights",
+        str(bundle / "portfolio.json"),
+        "--base-currency",
+        "both",
+        "--output-dir",
+        str(output),
     ]
     if allow:
         argv.append("--allow-synthetic-demo")
@@ -28,10 +33,15 @@ def test_semantic_projection_detects_provenance_change():
     from pcopt.demo import semantic_projection
 
     report = {
-        "schema_version": 1, "dataset_id": "abc", "data_kind": "synthetic_test",
-        "evaluation": {}, "source_assumptions": {},
+        "schema_version": 1,
+        "dataset_id": "abc",
+        "data_kind": "synthetic_test",
+        "evaluation": {},
+        "source_assumptions": {},
         "provenance": {"fx": {"selected_endpoints": [{"year": 2025}]}},
-        "coverage": {}, "views": {}, "readiness": {},
+        "coverage": {},
+        "views": {},
+        "readiness": {},
         "reproduce": {"shell_display": "machine-specific"},
     }
     changed = copy.deepcopy(report)
@@ -77,7 +87,9 @@ def test_demo_end_to_end_requires_production_data_and_verifies(tmp_path):
     actual = tmp_path / "actual"
     report = run_benchmark(_benchmark_args(actual))
     assert {path.name for path in actual.iterdir()} == {
-        "benchmark.json", "benchmark.md", "benchmark.provenance.json",
+        "benchmark.json",
+        "benchmark.md",
+        "benchmark.provenance.json",
     }
     assert report["data_kind"] == "synthetic_test"
     assert report["readiness"]["production_data_required"] is True
@@ -88,10 +100,20 @@ def test_demo_end_to_end_requires_production_data_and_verifies(tmp_path):
     verify_demo(expected, actual)
 
 
-@pytest.mark.parametrize("key", [
-    "schema_version", "dataset_id", "data_kind", "evaluation", "source_assumptions",
-    "provenance", "coverage", "views", "readiness",
-])
+@pytest.mark.parametrize(
+    "key",
+    [
+        "schema_version",
+        "dataset_id",
+        "data_kind",
+        "evaluation",
+        "source_assumptions",
+        "provenance",
+        "coverage",
+        "views",
+        "readiness",
+    ],
+)
 def test_verifier_names_semantic_mismatch(tmp_path, key):
     from pcopt.demo import verify_demo
 
@@ -133,9 +155,17 @@ def test_generator_reproduces_checked_in_bundle(tmp_path):
 
     outputs = [tmp_path / "first", tmp_path / "second"]
     for output in outputs:
-        subprocess.run([
-            sys.executable, "scripts/generate_demo_bundle.py", "--output", str(output),
-        ], check=True, capture_output=True, text=True)
+        subprocess.run(
+            [
+                sys.executable,
+                "scripts/generate_demo_bundle.py",
+                "--output",
+                str(output),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
     expected = {path.name: path.read_bytes() for path in DEMO.iterdir() if path.is_file()}
     for output in outputs:
         assert {path.name: path.read_bytes() for path in output.iterdir()} == expected
@@ -144,5 +174,6 @@ def test_generator_reproduces_checked_in_bundle(tmp_path):
     assert dataset.nominal.loc[2015, "DEMO-GROWTH"] == 0.08
     assert dataset.nominal.loc[2025, "DEMO-DEFENSIVE"] == 0.024
     assert dataset.references.groupby("asset_id")["year"].apply(list).to_dict() == {
-        "DEMO-GROWTH": [2015, 2020, 2025], "DEMO-DEFENSIVE": [2015, 2020, 2025],
+        "DEMO-GROWTH": [2015, 2020, 2025],
+        "DEMO-DEFENSIVE": [2015, 2020, 2025],
     }

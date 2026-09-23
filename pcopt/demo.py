@@ -6,7 +6,6 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-
 SEMANTIC_KEYS = (
     "schema_version",
     "dataset_id",
@@ -34,15 +33,10 @@ def verify_demo(expected_dir: Path, actual_dir: Path) -> None:
     actual = json.loads((actual_dir / "benchmark.json").read_text(encoding="utf-8"))
     expected_projection = semantic_projection(expected)
     actual_projection = semantic_projection(actual)
-    differing = [
-        key for key in SEMANTIC_KEYS
-        if expected_projection[key] != actual_projection[key]
-    ]
+    differing = [key for key in SEMANTIC_KEYS if expected_projection[key] != actual_projection[key]]
     if differing:
         raise AssertionError("demo semantic mismatch: " + ", ".join(differing))
-    provenance = json.loads(
-        (actual_dir / "benchmark.provenance.json").read_text(encoding="utf-8")
-    )
+    provenance = json.loads((actual_dir / "benchmark.provenance.json").read_text(encoding="utf-8"))
     for name in ("benchmark.json", "benchmark.md"):
         actual_sha = hashlib.sha256((actual_dir / name).read_bytes()).hexdigest()
         if actual_sha != provenance["artifacts"][name]:

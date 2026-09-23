@@ -1,6 +1,22 @@
 from pathlib import Path
 
 
+def test_ci_workflow_contains_all_publication_gates():
+    text = Path(".github/workflows/ci.yml").read_text()
+    for marker in (
+        "quality:",
+        "tests:",
+        "demo:",
+        "publication:",
+        'python-version: ["3.10", "3.12", "3.14"]',
+        "ruff check",
+        "python -m build",
+        "scripts/verify_demo.py",
+        "scripts/check_publication.py",
+    ):
+        assert marker in text
+
+
 def test_readme_contains_public_story_and_runnable_demo():
     text = Path("README.md").read_text(encoding="utf-8")
     required = [

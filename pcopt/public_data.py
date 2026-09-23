@@ -11,7 +11,6 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-
 FRENCH_BASE_URL = "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp"
 FRED_CSV_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
 FREEGOLDAPI_CSV_URL = "https://freegoldapi.com/data/latest.csv"
@@ -309,17 +308,16 @@ def build_us_public_proxy_returns(
     nominal["USA-BIL"] = treasury_bill_returns_from_discount_yield(fetch_fred_series("TB3MS"))
     nominal["USA-STT"] = treasury_duration_returns(fetch_fred_series("GS1"), duration=0.9, label="USA-STT")
     nominal["USA-ITT"] = treasury_duration_returns(fetch_fred_series("GS10"), duration=7.5, label="USA-ITT")
-    ltt_yield = combine_yield_series(fetch_fred_series("GS20"), fetch_fred_series("LTGOVTBD"), fetch_fred_series("GS10"))
+    ltt_yield = combine_yield_series(
+        fetch_fred_series("GS20"), fetch_fred_series("LTGOVTBD"), fetch_fred_series("GS10")
+    )
     nominal["USA-LTT"] = treasury_duration_returns(ltt_yield, duration=14.0, label="USA-LTT")
 
     if include_commodities:
         nominal["GLO-COM"] = annual_price_returns(fetch_fred_series("PALLFNFINDEXM")).rename("GLO-COM")
         nominal["GLO-GLD"] = annual_price_returns(fetch_freegoldapi_prices()).rename("GLO-GLD")
 
-    real = {
-        asset: real_returns(series, inflation).rename(asset)
-        for asset, series in nominal.items()
-    }
+    real = {asset: real_returns(series, inflation).rename(asset) for asset, series in nominal.items()}
     df = pd.DataFrame(real).sort_index()
     df = df.loc[df.index >= start_year]
     last_completed_year = date.today().year - 1

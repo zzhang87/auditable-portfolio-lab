@@ -18,9 +18,7 @@ def open_database_readonly(path: str | Path) -> sqlite3.Connection:
     db_path = Path(path)
     if not db_path.exists():
         raise FileNotFoundError(f"database does not exist: {db_path}")
-    return _configure_connection(
-        sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
-    )
+    return _configure_connection(sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True))
 
 
 def initialize_database(conn: sqlite3.Connection) -> None:
@@ -56,9 +54,7 @@ def initialize_database(conn: sqlite3.Connection) -> None:
         );
         """
     )
-    version_row = conn.execute(
-        "SELECT value FROM schema_meta WHERE key = 'schema_version'"
-    ).fetchone()
+    version_row = conn.execute("SELECT value FROM schema_meta WHERE key = 'schema_version'").fetchone()
     if version_row is None:
         conn.execute("INSERT INTO schema_meta(key, value) VALUES ('schema_version', '1')")
     elif version_row[0] != "1":
@@ -139,18 +135,14 @@ def link_run_result(conn: sqlite3.Connection, *, run_id, version_id) -> None:
         (version_id, run_id),
     )
     if run_update.rowcount != 1:
-        raise RuntimeError(
-            f"link_run_result failed to link optimizer_runs row for run_id={run_id}"
-        )
+        raise RuntimeError(f"link_run_result failed to link optimizer_runs row for run_id={run_id}")
 
     version_update = conn.execute(
         "UPDATE portfolio_versions SET source_run_id = ? WHERE id = ?",
         (run_id, version_id),
     )
     if version_update.rowcount != 1:
-        raise RuntimeError(
-            f"link_run_result failed to link portfolio_versions row for version_id={version_id}"
-        )
+        raise RuntimeError(f"link_run_result failed to link portfolio_versions row for version_id={version_id}")
 
 
 def get_portfolio_version(conn: sqlite3.Connection, version_id: int):
@@ -167,9 +159,7 @@ def list_child_versions(conn: sqlite3.Connection, parent_version_id: int) -> lis
 
 
 def list_root_versions(conn: sqlite3.Connection) -> list[dict]:
-    rows = conn.execute(
-        "SELECT * FROM portfolio_versions WHERE parent_version_id IS NULL ORDER BY id"
-    ).fetchall()
+    rows = conn.execute("SELECT * FROM portfolio_versions WHERE parent_version_id IS NULL ORDER BY id").fetchall()
     return [_decode_portfolio_version_row(row) for row in rows]
 
 

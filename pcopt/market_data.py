@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import date
 import hashlib
 import json
 import os
-from pathlib import Path
 import shutil
 import tempfile
+from dataclasses import dataclass
+from datetime import date
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -50,9 +50,7 @@ def load_strict_json(path: str | Path) -> dict:
 def dataset_identity(manifest: dict) -> str:
     content = {key: value for key, value in manifest.items() if key != "dataset_id"}
     try:
-        encoded = json.dumps(
-            content, sort_keys=True, separators=(",", ":"), allow_nan=False
-        ).encode("utf-8")
+        encoded = json.dumps(content, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
     except (TypeError, ValueError) as error:
         raise ValueError(f"manifest is not canonical JSON: {error}") from error
     return hashlib.sha256(encoded).hexdigest()
@@ -252,9 +250,7 @@ def _validate_inflation_metadata(metadata: dict) -> None:
             raise ValueError(f"{currency} CPI must use decimal_change units")
 
 
-def load_market_dataset(
-    manifest_path: str | Path, *, allow_synthetic: bool = False
-) -> MarketDataset:
+def load_market_dataset(manifest_path: str | Path, *, allow_synthetic: bool = False) -> MarketDataset:
     manifest_file = Path(manifest_path).resolve()
     manifest = load_strict_json(manifest_file)
     _validate_manifest_shape(manifest)
@@ -266,10 +262,7 @@ def load_market_dataset(
     required_inputs = {"annual_nominal", "fx_daily", "inflation", "references"}
     if not isinstance(input_entries, dict) or set(input_entries) != required_inputs:
         raise ValueError("input_files must contain the four canonical inputs")
-    paths = {
-        key: _resolve_file(root, input_entries[key], f"input {key}")
-        for key in sorted(required_inputs)
-    }
+    paths = {key: _resolve_file(root, input_entries[key], f"input {key}") for key in sorted(required_inputs)}
 
     raw_files = manifest["raw_files"]
     if not isinstance(raw_files, list) or not raw_files:
@@ -295,9 +288,7 @@ def load_market_dataset(
     )
     nominal["year"] = _integer_years(nominal["year"], "annual_nominal")
     if nominal[["asset_id", "year"]].duplicated().any():
-        duplicate = nominal.loc[
-            nominal[["asset_id", "year"]].duplicated(keep=False)
-        ].iloc[0]
+        duplicate = nominal.loc[nominal[["asset_id", "year"]].duplicated(keep=False)].iloc[0]
         raise ValueError(f"duplicate asset/year: {duplicate['asset_id']} {duplicate['year']}")
     nominal["nominal_return"] = _finite_numeric(nominal["nominal_return"], "finite return")
     if (nominal["nominal_return"] <= -1).any():
@@ -357,27 +348,19 @@ def load_market_dataset(
     missing_reference_assets = set(manifest["series"]) - set(references["asset_id"])
     if missing_reference_assets:
         raise ValueError(
-            "reference evidence missing for selected assets: "
-            + ", ".join(sorted(missing_reference_assets))
+            "reference evidence missing for selected assets: " + ", ".join(sorted(missing_reference_assets))
         )
     unknown_reference_assets = set(references["asset_id"]) - set(manifest["series"])
     if unknown_reference_assets:
-        raise ValueError(
-            "reference evidence contains unknown assets: "
-            + ", ".join(sorted(unknown_reference_assets))
-        )
+        raise ValueError("reference evidence contains unknown assets: " + ", ".join(sorted(unknown_reference_assets)))
     if manifest["data_kind"] == "market":
         required_assets = manifest["coverage"].get("required_assets", [])
-        if not isinstance(required_assets, list) or not all(
-            isinstance(asset, str) for asset in required_assets
-        ):
+        if not isinstance(required_assets, list) or not all(isinstance(asset, str) for asset in required_assets):
             raise ValueError("coverage required_assets must be a list of strings")
         for asset_id in manifest["series"]:
             count = references.loc[references["asset_id"] == asset_id, "year"].nunique()
             if count < 3:
-                raise ValueError(
-                    f"at least three non-overlapping reference years required for {asset_id}"
-                )
+                raise ValueError(f"at least three non-overlapping reference years required for {asset_id}")
     for row in references.itertuples(index=False):
         try:
             _resolve_file(
@@ -386,19 +369,16 @@ def load_market_dataset(
                 f"reference {row.asset_id} {row.year}",
             )
         except ValueError as error:
-            raise ValueError(f"reference evidence checksum/path failure for {row.asset_id} {row.year}: {error}") from error
-        asset_rows = nominal[
-            (nominal["asset_id"] == row.asset_id) & (nominal["year"] == row.year)
-        ]
-        if asset_rows.empty:
             raise ValueError(
-                f"reference year missing from nominal data: {row.asset_id} {row.year}"
-            )
+                f"reference evidence checksum/path failure for {row.asset_id} {row.year}: {error}"
+            ) from error
+        asset_rows = nominal[(nominal["asset_id"] == row.asset_id) & (nominal["year"] == row.year)]
+        if asset_rows.empty:
+            raise ValueError(f"reference year missing from nominal data: {row.asset_id} {row.year}")
         actual = float(asset_rows.iloc[0]["nominal_return"])
         if abs(actual - row.expected_return) > row.absolute_tolerance:
             raise ValueError(
-                f"reference return mismatch for {row.asset_id} {row.year}: "
-                f"expected {row.expected_return}, got {actual}"
+                f"reference return mismatch for {row.asset_id} {row.year}: expected {row.expected_return}, got {actual}"
             )
 
     wide_nominal = nominal.pivot(index="year", columns="asset_id", values="nominal_return").sort_index()
@@ -436,9 +416,7 @@ def build_market_dataset(
     source_manifest = load_strict_json(input_path)
     if source_manifest.get("data_kind") == "synthetic_test" and not _allow_synthetic_for_tests:
         raise ValueError("synthetic datasets cannot be built as production data")
-    dataset = load_market_dataset(
-        input_path, allow_synthetic=_allow_synthetic_for_tests
-    )
+    dataset = load_market_dataset(input_path, allow_synthetic=_allow_synthetic_for_tests)
     destination = Path(output_dir).resolve()
     destination.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix=f".{destination.name}.staging-", dir=destination.parent))
@@ -494,9 +472,7 @@ def build_market_dataset(
         references = dataset.references.copy().sort_values(["asset_id", "year"])
         evidence_paths = []
         for row in references.itertuples(index=False):
-            evidence_paths.append(
-                copy_artifact(row.evidence_path, row.evidence_sha256, "evidence")
-            )
+            evidence_paths.append(copy_artifact(row.evidence_path, row.evidence_sha256, "evidence"))
         references["evidence_path"] = evidence_paths
         _write_canonical_csv(
             references[
@@ -541,36 +517,27 @@ def build_market_dataset(
             for key, value in source_manifest.items()
             if key not in {"dataset_id", "input_files", "raw_files", "coverage"}
         }
-        manifest.update(
-            {"coverage": coverage, "input_files": input_files, "raw_files": raw_files}
-        )
+        manifest.update({"coverage": coverage, "input_files": input_files, "raw_files": raw_files})
         manifest["coverage_as_of"] = as_of.isoformat()
         manifest["dataset_id"] = dataset_identity(manifest)
         (staging / "manifest.json").write_text(
             json.dumps(manifest, indent=2, sort_keys=True, allow_nan=False) + "\n",
             encoding="utf-8",
         )
-        load_market_dataset(
-            staging / "manifest.json", allow_synthetic=_allow_synthetic_for_tests
-        )
+        load_market_dataset(staging / "manifest.json", allow_synthetic=_allow_synthetic_for_tests)
 
         if destination.exists():
             existing_files = {
-                path.relative_to(destination): path.read_bytes()
-                for path in destination.rglob("*")
-                if path.is_file()
+                path.relative_to(destination): path.read_bytes() for path in destination.rglob("*") if path.is_file()
             }
             staged_files = {
-                path.relative_to(staging): path.read_bytes()
-                for path in staging.rglob("*")
-                if path.is_file()
+                path.relative_to(staging): path.read_bytes() for path in staging.rglob("*") if path.is_file()
             }
             if existing_files == staged_files:
                 shutil.rmtree(staging)
                 return destination / "manifest.json"
             raise FileExistsError(
-                f"output directory already contains a different dataset: {destination}; "
-                "choose a new output directory"
+                f"output directory already contains a different dataset: {destination}; choose a new output directory"
             )
         os.replace(staging, destination)
         return destination / "manifest.json"

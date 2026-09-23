@@ -9,10 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from pcopt.public_data import write_source_catalog, write_us_public_proxy_returns
-
 
 def main() -> None:
+    from pcopt.public_data import write_source_catalog, write_us_public_proxy_returns
+
     parser = argparse.ArgumentParser(description="Build public annual real-return proxy data.")
     parser.add_argument(
         "--output",

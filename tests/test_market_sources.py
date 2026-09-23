@@ -15,9 +15,7 @@ def test_consecutive_calendar_year_levels_only():
     assert result.index.tolist() == [2023, 2024]
     assert result["nominal_return"].tolist() == pytest.approx([0.1, 0.1])
     with pytest.raises(ValueError, match="consecutive"):
-        annual_returns_from_levels(
-            levels.drop(pd.Timestamp("2023-12-29")), as_of=date(2025, 2, 1)
-        )
+        annual_returns_from_levels(levels.drop(pd.Timestamp("2023-12-29")), as_of=date(2025, 2, 1))
 
 
 @pytest.mark.parametrize(
@@ -50,9 +48,7 @@ def test_level_import_ignores_current_incomplete_year():
 def test_level_import_returns_decimal_units():
     from pcopt.market_sources.imports import annual_returns_from_levels
 
-    levels = pd.Series(
-        [100.0, 105.0], index=pd.to_datetime(["2022-12-30", "2023-12-29"])
-    )
+    levels = pd.Series([100.0, 105.0], index=pd.to_datetime(["2022-12-30", "2023-12-29"]))
     assert annual_returns_from_levels(levels, as_of=date(2024, 1, 2)).iloc[0, 0] == pytest.approx(0.05)
 
 
@@ -74,9 +70,7 @@ def test_parse_fred_csv_rejects_duplicate_dates_and_wrong_columns(tmp_path):
     from pcopt.market_sources.fred import parse_fred_csv
 
     duplicate = tmp_path / "duplicate.csv"
-    duplicate.write_text(
-        "observation_date,DEXCHUS\n2024-01-01,7.1\n2024-01-01,7.2\n", encoding="utf-8"
-    )
+    duplicate.write_text("observation_date,DEXCHUS\n2024-01-01,7.1\n2024-01-01,7.2\n", encoding="utf-8")
     with pytest.raises(ValueError, match="duplicate FRED dates"):
         parse_fred_csv(duplicate, "DEXCHUS")
 

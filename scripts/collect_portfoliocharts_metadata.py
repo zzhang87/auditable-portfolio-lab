@@ -11,7 +11,6 @@ from urllib.parse import urljoin
 
 import requests
 
-
 BASE_URL = "https://portfoliocharts.com"
 PAGES = {
     "methodology": f"{BASE_URL}/user-guide/methodology/",

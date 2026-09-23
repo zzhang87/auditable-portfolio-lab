@@ -89,8 +89,12 @@ def test_build_us_public_proxy_returns_includes_developed_ex_us_equity_assets(mo
     monkeypatch.setattr(public_data, "annual_cpi_inflation", lambda _series: inflation)
     monkeypatch.setattr(public_data, "fetch_fred_series", lambda series_id: pd.Series(dtype=float, name=series_id))
     monkeypatch.setattr(public_data, "fetch_french_annual_6_portfolios", fake_fetch_french)
-    monkeypatch.setattr(public_data, "treasury_bill_returns_from_discount_yield", lambda _series: pd.Series(dtype=float, name="USA-BIL"))
-    monkeypatch.setattr(public_data, "treasury_duration_returns", lambda _series, duration, label: pd.Series(dtype=float, name=label))
+    monkeypatch.setattr(
+        public_data, "treasury_bill_returns_from_discount_yield", lambda _series: pd.Series(dtype=float, name="USA-BIL")
+    )
+    monkeypatch.setattr(
+        public_data, "treasury_duration_returns", lambda _series, duration, label: pd.Series(dtype=float, name=label)
+    )
     monkeypatch.setattr(public_data, "combine_yield_series", lambda *series: pd.Series(dtype=float, name="yield"))
 
     out, _ = build_us_public_proxy_returns(start_year=2020, include_commodities=False)

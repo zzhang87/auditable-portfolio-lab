@@ -5,7 +5,6 @@ import subprocess
 from pathlib import Path
 from typing import Sequence
 
-
 FORBIDDEN_PATH_PARTS = {
     ".superpowers",
     ".venv",
@@ -55,9 +54,7 @@ def audit_tree(root: Path, paths: Sequence[Path]) -> list[str]:
                 if not clean or clean.startswith(("http://", "https://", "mailto:", "#")):
                     continue
                 if not (path.parent / clean).resolve().exists():
-                    violations.append(
-                        f"broken relative link in {relative.as_posix()}: {target}"
-                    )
+                    violations.append(f"broken relative link in {relative.as_posix()}: {target}")
     return sorted(set(violations))
 
 
