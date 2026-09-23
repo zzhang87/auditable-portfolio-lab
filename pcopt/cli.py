@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import argparse
-from datetime import date
 import json
 import re
-import sys
+from datetime import date
 from pathlib import Path
 
 from pcopt.data import load_returns_csv
 from pcopt.metrics import MetricConfig
 from pcopt.optimizer import GeneticOptimizer
+from pcopt.replay import build_replay
 from pcopt.storage import (
     create_optimizer_run,
     create_portfolio_version,
@@ -22,7 +22,6 @@ from pcopt.storage import (
     open_database,
     open_database_readonly,
 )
-
 
 CONSTRAINT_RE = re.compile(r"^([A-Za-z0-9_]+)\s*(<=|>=|<|>|==|=)\s*(-?\d+(?:\.\d+)?)$")
 
@@ -239,8 +238,6 @@ def run_run_show(args: argparse.Namespace) -> dict[str, object] | None:
 
 
 def run_benchmark(args: argparse.Namespace) -> dict:
-    import shlex
-
     from pcopt.benchmark import evaluate_benchmarks, write_benchmark_report
     from pcopt.market_data import load_market_dataset, load_strict_json
 
@@ -261,18 +258,11 @@ def run_benchmark(args: argparse.Namespace) -> dict:
         end_year=args.end_year,
         as_of=requested_as_of,
     )
-    argv = [
-        sys.executable, "-m", "pcopt.cli", "benchmark",
-        "--manifest", str(manifest_path), "--weights", str(weights_path),
-        "--base-currency", args.base_currency,
-        "--output-dir", str(output_path),
-    ]
-    argv.extend(["--as-of", report["evaluation"]["as_of"]])
-    if args.start_year is not None:
-        argv.extend(["--start-year", str(args.start_year)])
-    if args.end_year is not None:
-        argv.extend(["--end-year", str(args.end_year)])
-    report["reproduce"] = {"argv": argv, "shell_display": shlex.join(argv)}
+    report["reproduce"] = build_replay(
+        args,
+        report["evaluation"]["as_of"],
+        Path.cwd(),
+    )
     write_benchmark_report(report, output_path)
     return report
 

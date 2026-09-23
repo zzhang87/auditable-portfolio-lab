@@ -224,7 +224,7 @@ def test_cli_report_records_runnable_paths_and_creates_no_database(tmp_path, mon
     source = tmp_path / "source"
     source.mkdir()
     input_path = _production_bundle(source)
-    manifest = market_data.build_market_dataset(
+    market_data.build_market_dataset(
         input_path, tmp_path / "built", as_of=date(2024, 6, 1)
     )
     weights = tmp_path / "weights.json"
@@ -240,20 +240,51 @@ def test_cli_report_records_runnable_paths_and_creates_no_database(tmp_path, mon
     report = run_benchmark(args)
 
     argv = report["reproduce"]["argv"]
-    assert argv[argv.index("--manifest") + 1] == str(manifest.resolve())
-    assert argv[argv.index("--weights") + 1] == str(weights.resolve())
-    assert argv[argv.index("--output-dir") + 1] == str(output.resolve())
+    assert argv[0] == "pcopt"
+    assert argv[argv.index("--manifest") + 1] == "built/manifest.json"
+    assert argv[argv.index("--weights") + 1] == "weights.json"
+    assert argv[argv.index("--output-dir") + 1] == "reports"
     assert argv[argv.index("--as-of") + 1] == "2024-06-01"
     assert argv[argv.index("--start-year") + 1] == "2022"
     assert argv[argv.index("--end-year") + 1] == "2023"
     assert (output / "benchmark.json").is_file()
     assert not list(tmp_path.rglob("*.sqlite3"))
 
-    elsewhere = tmp_path / "elsewhere"
-    elsewhere.mkdir()
-    env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1]))
-    completed = subprocess.run(argv, cwd=elsewhere, env=env, capture_output=True, text=True, check=False)
+    original_cwd = tmp_path
+    env = dict(
+        os.environ,
+        PYTHONPATH=str(Path(__file__).resolve().parents[1]),
+        PATH=f"{Path(sys.executable).parent}{os.pathsep}{os.environ['PATH']}",
+    )
+    completed = subprocess.run(argv, cwd=original_cwd, env=env, capture_output=True, text=True, check=False)
     assert completed.returncode == 0, completed.stderr
+
+
+def test_cli_report_redacts_external_manifest_path(tmp_path, monkeypatch):
+    import pcopt.market_data as market_data
+    from pcopt.cli import build_parser, run_benchmark
+
+    source = tmp_path / "source"
+    source.mkdir()
+    input_path = _production_bundle(source)
+    manifest = market_data.build_market_dataset(
+        input_path, tmp_path / "built", as_of=date(2024, 6, 1)
+    )
+    weights = tmp_path / "weights.json"
+    weights.write_text('{"Only US": {"US-EQ": 1.0}}\n')
+    invocation_dir = tmp_path / "invocation"
+    invocation_dir.mkdir()
+    monkeypatch.chdir(invocation_dir)
+    args = build_parser().parse_args([
+        "benchmark", "--manifest", str(manifest), "--weights", str(weights),
+        "--base-currency", "USD", "--output-dir", "reports",
+    ])
+
+    report = run_benchmark(args)
+
+    assert report["reproduce"]["runnable"] is False
+    assert report["reproduce"]["argv"][3] == "<external>/manifest.json"
+    assert str(tmp_path.parent) not in report["reproduce"]["shell_display"]
 
 
 def test_automatic_boundary_reproduction_is_byte_identical(tmp_path, monkeypatch):
@@ -280,7 +311,11 @@ def test_automatic_boundary_reproduction_is_byte_identical(tmp_path, monkeypatch
     argv = report["reproduce"]["argv"]
     assert "--start-year" not in argv
     assert "--end-year" not in argv
-    env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1]))
+    env = dict(
+        os.environ,
+        PYTHONPATH=str(Path(__file__).resolve().parents[1]),
+        PATH=f"{Path(sys.executable).parent}{os.pathsep}{os.environ['PATH']}",
+    )
     completed = subprocess.run(argv, cwd=tmp_path, env=env, capture_output=True, text=True, check=False)
     assert completed.returncode == 0, completed.stderr
     assert {path.name: path.read_bytes() for path in output.iterdir()} == before
