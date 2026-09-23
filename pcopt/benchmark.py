@@ -600,7 +600,7 @@ def write_benchmark_report(report: dict, output_dir: str | Path, *, allow_synthe
     root = Path(output_dir)
     json_bytes = (json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
     markdown_bytes = render_benchmark_markdown(report).encode("utf-8")
-    # Complete validation occurs before either target is replaced.
+    # Complete serialization and validation before touching any target.
     json.loads(json_bytes)
     markdown_bytes.decode("utf-8")
     provenance = {
@@ -612,6 +612,26 @@ def write_benchmark_report(report: dict, output_dir: str | Path, *, allow_synthe
         },
     }
     provenance_bytes = (json.dumps(provenance, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
-    _atomic_write(root / "benchmark.json", json_bytes)
-    _atomic_write(root / "benchmark.md", markdown_bytes)
-    _atomic_write(root / "benchmark.provenance.json", provenance_bytes)
+    artifacts = {
+        "benchmark.json": json_bytes,
+        "benchmark.md": markdown_bytes,
+        "benchmark.provenance.json": provenance_bytes,
+    }
+    missing = []
+    conflicts = []
+    for name, content in artifacts.items():
+        path = root / name
+        try:
+            existing = path.read_bytes()
+        except FileNotFoundError:
+            missing.append(name)
+        else:
+            if existing != content:
+                conflicts.append(name)
+    if conflicts:
+        raise FileExistsError(
+            f"Benchmark artifacts differ in {root}: {', '.join(conflicts)}. "
+            "Use a new or empty output directory to preserve existing evidence."
+        )
+    for name in missing:
+        _atomic_write(root / name, artifacts[name])

@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import date
 
 import pandas as pd
@@ -222,6 +223,72 @@ def test_markdown_escapes_metadata_and_writer_requires_demo_opt_in(tmp_path):
     assert parsed["dataset_id"] == "synthetic-id"
     provenance = json.loads((tmp_path / "benchmark.provenance.json").read_text())
     assert set(provenance["artifacts"]) == {"benchmark.json", "benchmark.md"}
+
+
+def test_writer_identical_replay_preserves_artifact_bytes_and_metadata(tmp_path):
+    from pcopt.benchmark import evaluate_benchmarks, write_benchmark_report
+
+    report = evaluate_benchmarks(_dataset(), PORTFOLIOS, base_currency="both", as_of=date(2026, 1, 1))
+    write_benchmark_report(report, tmp_path, allow_synthetic_demo=True)
+    for path in tmp_path.iterdir():
+        os.utime(path, ns=(1_000_000_000, 1_000_000_000))
+    before = {
+        path.name: (path.read_bytes(), path.stat().st_ino, path.stat().st_mtime_ns) for path in tmp_path.iterdir()
+    }
+
+    write_benchmark_report(report, tmp_path, allow_synthetic_demo=True)
+
+    after = {path.name: (path.read_bytes(), path.stat().st_ino, path.stat().st_mtime_ns) for path in tmp_path.iterdir()}
+    assert after == before
+
+
+@pytest.mark.parametrize("conflict", ["benchmark.json", "benchmark.md", "benchmark.provenance.json"])
+@pytest.mark.parametrize("missing_sibling", [False, True])
+def test_writer_conflicting_replay_preserves_every_existing_artifact(tmp_path, conflict, missing_sibling):
+    from pcopt.benchmark import evaluate_benchmarks, write_benchmark_report
+
+    report = evaluate_benchmarks(_dataset(), PORTFOLIOS, base_currency="both", as_of=date(2026, 1, 1))
+    write_benchmark_report(report, tmp_path, allow_synthetic_demo=True)
+    (tmp_path / conflict).write_bytes(b"previous evidence must survive\n")
+    if missing_sibling:
+        next(path for path in tmp_path.iterdir() if path.name != conflict).unlink()
+    before = {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+
+    with pytest.raises(FileExistsError) as error:
+        write_benchmark_report(report, tmp_path, allow_synthetic_demo=True)
+
+    assert conflict in str(error.value)
+    assert {path.name: path.read_bytes() for path in tmp_path.iterdir()} == before
+
+
+def test_writer_changed_weights_rejects_replay_and_preserves_previous_evidence(tmp_path):
+    from pcopt.benchmark import evaluate_benchmarks, write_benchmark_report
+
+    original = evaluate_benchmarks(_dataset(), PORTFOLIOS, base_currency="both", as_of=date(2026, 1, 1))
+    write_benchmark_report(original, tmp_path, allow_synthetic_demo=True)
+    before = {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+    changed = evaluate_benchmarks(
+        _dataset(), {"global": {"USA-LCB": 1.0}}, base_currency="both", as_of=date(2026, 1, 1)
+    )
+
+    with pytest.raises(FileExistsError) as error:
+        write_benchmark_report(changed, tmp_path, allow_synthetic_demo=True)
+
+    assert all(name in str(error.value) for name in before)
+    assert {path.name: path.read_bytes() for path in tmp_path.iterdir()} == before
+
+
+def test_writer_identical_replay_restores_missing_artifact(tmp_path):
+    from pcopt.benchmark import evaluate_benchmarks, write_benchmark_report
+
+    report = evaluate_benchmarks(_dataset(), PORTFOLIOS, base_currency="both", as_of=date(2026, 1, 1))
+    write_benchmark_report(report, tmp_path, allow_synthetic_demo=True)
+    before = {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+    (tmp_path / "benchmark.md").unlink()
+
+    write_benchmark_report(report, tmp_path, allow_synthetic_demo=True)
+
+    assert {path.name: path.read_bytes() for path in tmp_path.iterdir()} == before
 
 
 def test_markdown_renders_available_long_horizon_metrics_and_coverage_reasons():
