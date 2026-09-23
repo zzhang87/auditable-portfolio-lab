@@ -27,7 +27,7 @@ def annual_fx_endpoints(fx_daily: pd.DataFrame, years: Sequence[int]) -> pd.Data
         raise ValueError("duplicate FX dates")
     quotes.index = dates
     quotes = quotes.sort_index()
-    observed = quotes.stack().to_numpy(dtype=float)
+    observed = quotes.stack().dropna().to_numpy(dtype=float)
     if not np.isfinite(observed).all() or (observed <= 0).any():
         raise ValueError("FX observations must be positive and finite")
     common = quotes.dropna(how="any")

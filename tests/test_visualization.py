@@ -40,6 +40,31 @@ def test_core_import_does_not_load_matplotlib():
     assert completed.stdout.strip() == "False"
 
 
+def test_renderer_drawdown_includes_initial_wealth(tmp_path, monkeypatch):
+    from matplotlib.figure import Figure
+
+    from pcopt.visualization import render_benchmark_overview
+
+    report = _demo_report()
+    for currency in ("USD", "CNY"):
+        report["views"][currency]["portfolios"]["balanced_demo"]["real_wealth"] = [
+            {"year": "initial", "value": 1.0},
+            {"year": 2015, "value": 0.8},
+            {"year": 2016, "value": 0.88},
+        ]
+    rendered_drawdown = []
+    savefig = Figure.savefig
+
+    def capture_drawdown(figure, *args, **kwargs):
+        rendered_drawdown.extend(figure.axes[1].lines[0].get_ydata())
+        return savefig(figure, *args, **kwargs)
+
+    monkeypatch.setattr(Figure, "savefig", capture_drawdown)
+    render_benchmark_overview(_write_report(tmp_path, report), tmp_path / "overview.png")
+
+    assert rendered_drawdown == pytest.approx([-0.2, -0.12])
+
+
 @pytest.mark.parametrize("currency", ["USD", "CNY"])
 def test_renderer_rejects_report_missing_required_currency_view(tmp_path, currency):
     from pcopt.visualization import render_benchmark_overview

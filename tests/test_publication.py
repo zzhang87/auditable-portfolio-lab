@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 
@@ -15,6 +16,10 @@ def test_ci_workflow_contains_all_publication_gates():
         "scripts/check_publication.py",
     ):
         assert marker in text
+
+    tests_job = re.search(r"(?ms)^  tests:\n.*?(?=^  \S|\Z)", text).group()
+    assert 'python -m pip install -e ".[dev,viz]"' in tests_job
+    assert "python -m pytest -q" in tests_job
 
 
 def test_readme_contains_public_story_and_runnable_demo():

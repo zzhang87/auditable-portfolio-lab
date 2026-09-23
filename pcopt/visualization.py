@@ -44,7 +44,9 @@ def render_benchmark_overview(report_path: Path, output_path: Path) -> Path:
     if years != cny_years:
         raise ValueError("USD and CNY real-wealth series must use matching years")
 
-    drawdown = usd_real / np.maximum.accumulate(usd_real) - 1
+    initial_wealth = next(point["value"] for point in usd["real_wealth"] if point["year"] == "initial")
+    high_water_mark = np.maximum.accumulate(np.r_[initial_wealth, usd_real])[1:]
+    drawdown = usd_real / high_water_mark - 1
     fig, axes = plt.subplots(2, 2, figsize=(12, 7.5))
     fig.subplots_adjust(left=0.06, right=0.985, bottom=0.10, top=0.89, hspace=0.46, wspace=0.12)
     fig.suptitle("Auditable Portfolio Lab - Synthetic Demo", y=0.965, fontsize=16, fontweight="bold")
