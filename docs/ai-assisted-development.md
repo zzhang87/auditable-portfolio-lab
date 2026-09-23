@@ -2,7 +2,7 @@
 
 The product is an auditable portfolio research workflow. AI supports its development through research assistance, implementation, and review; the repository does not claim that the product was built entirely or independently by AI.
 
-The operating model is: **AI accelerates exploration, implementation, and review; explicit requirements, deterministic checks, and reproducible artifacts decide what is accepted.** Human-approved scope and source review remain necessary. This repository does not claim isolated productivity gains caused by AI, measured time savings, or investment-performance improvements attributable to AI.
+The operating model is: **AI supports exploration, implementation, and review; explicit requirements, deterministic checks, and reproducible artifacts decide what is accepted.** Human-approved scope and source review remain necessary. This repository does not claim isolated productivity gains caused by AI, measured time savings, or investment-performance improvements attributable to AI.
 
 The cases below describe the contribution and acceptance boundary. Their evidence demonstrates the implemented behavior, not a controlled measurement of AI's causal impact. They are curated engineering cases, not prompt transcripts or invented historical pull requests.
 

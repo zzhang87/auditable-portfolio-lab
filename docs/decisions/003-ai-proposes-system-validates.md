@@ -6,7 +6,7 @@ AI can help explore sources, implement calculations, and identify review issues.
 
 ## Decision
 
-AI may propose research, code, and review findings. Tests, checksums, source checks, reproducible artifacts, and human-approved scope decide acceptance. The operating model is: AI accelerates exploration, implementation, and review; explicit requirements, deterministic checks, and reproducible artifacts decide what is accepted.
+AI may propose research, code, and review findings. Tests, checksums, source checks, reproducible artifacts, and human-approved scope decide acceptance. The operating model is: AI supports exploration, implementation, and review; explicit requirements, deterministic checks, and reproducible artifacts decide what is accepted.
 
 ## Consequences
 
