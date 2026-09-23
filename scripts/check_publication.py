@@ -45,7 +45,7 @@ def audit_tree(root: Path, paths: Sequence[Path]) -> list[str]:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        if home_pattern in text or re.search(r"[A-Za-z]:\\\\Users\\\\", text):
+        if home_pattern in text or re.search(r"[A-Za-z]:\\Users\\", text):
             violations.append(f"absolute user path: {relative.as_posix()}")
         if file_uri_pattern in text:
             violations.append(f"file URI: {relative.as_posix()}")
