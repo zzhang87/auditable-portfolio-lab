@@ -1,6 +1,26 @@
 from pathlib import Path
 
 
+def test_readme_contains_public_story_and_runnable_demo():
+    text = Path("README.md").read_text(encoding="utf-8")
+    required = [
+        "# Auditable Portfolio Lab",
+        "![Synthetic benchmark overview](assets/benchmark-overview.png)",
+        "## What It Demonstrates",
+        "## Five-Minute Demo",
+        "--allow-synthetic-demo",
+        "## How AI Was Used",
+        "docs/ai-assisted-development.md",
+        "## Architecture",
+        "docs/architecture.md",
+        "## Evaluation and Reproducibility",
+        "## Data Boundary and Limitations",
+        "not investment advice",
+    ]
+    for marker in required:
+        assert marker in text, f"README.md missing {marker}"
+
+
 def test_required_public_documents_have_expected_evidence_sections():
     required = {
         "docs/architecture.md": ["## Data Flow", "## Component Boundaries"],
