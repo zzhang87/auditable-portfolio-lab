@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,21 @@ def semantic_projection(report: Mapping[str, Any]) -> dict[str, Any]:
     return {key: report[key] for key in SEMANTIC_KEYS}
 
 
+def _semantic_equal(expected: Any, actual: Any) -> bool:
+    if isinstance(expected, bool) or isinstance(actual, bool):
+        return expected is actual
+    if isinstance(expected, (int, float)) and isinstance(actual, (int, float)):
+        return math.isclose(float(expected), float(actual), rel_tol=1e-12, abs_tol=1e-15)
+    if isinstance(expected, Mapping) and isinstance(actual, Mapping):
+        return expected.keys() == actual.keys() and all(_semantic_equal(expected[key], actual[key]) for key in expected)
+    if isinstance(expected, list) and isinstance(actual, list):
+        return len(expected) == len(actual) and all(
+            _semantic_equal(expected_item, actual_item)
+            for expected_item, actual_item in zip(expected, actual, strict=True)
+        )
+    return expected == actual
+
+
 def verify_demo(expected_dir: Path, actual_dir: Path) -> None:
     """Compare report semantics and verify the actual report artifact checksums."""
     for name in ("benchmark.json", "benchmark.md", "benchmark.provenance.json"):
@@ -33,7 +49,7 @@ def verify_demo(expected_dir: Path, actual_dir: Path) -> None:
     actual = json.loads((actual_dir / "benchmark.json").read_text(encoding="utf-8"))
     expected_projection = semantic_projection(expected)
     actual_projection = semantic_projection(actual)
-    differing = [key for key in SEMANTIC_KEYS if expected_projection[key] != actual_projection[key]]
+    differing = [key for key in SEMANTIC_KEYS if not _semantic_equal(expected_projection[key], actual_projection[key])]
     if differing:
         raise AssertionError("demo semantic mismatch: " + ", ".join(differing))
     provenance = json.loads((actual_dir / "benchmark.provenance.json").read_text(encoding="utf-8"))

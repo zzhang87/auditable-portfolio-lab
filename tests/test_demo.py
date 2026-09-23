@@ -1,5 +1,7 @@
 import copy
+import hashlib
 import json
+import math
 import shutil
 import subprocess
 import sys
@@ -125,6 +127,25 @@ def test_verifier_names_semantic_mismatch(tmp_path, key):
     path.write_text(json.dumps(report), encoding="utf-8")
     with pytest.raises(AssertionError, match=key):
         verify_demo(DEMO / "expected", actual)
+
+
+def test_verifier_accepts_last_bit_float_variation(tmp_path):
+    from pcopt.demo import verify_demo
+
+    actual = tmp_path / "actual"
+    shutil.copytree(DEMO / "expected", actual)
+    report_path = actual / "benchmark.json"
+    report = json.loads(report_path.read_text())
+    returns = report["views"]["CNY"]["portfolios"]["balanced_demo"]["nominal_returns"]
+    returns["2015"] = math.nextafter(returns["2015"], math.inf)
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+
+    provenance_path = actual / "benchmark.provenance.json"
+    provenance = json.loads(provenance_path.read_text())
+    provenance["artifacts"]["benchmark.json"] = hashlib.sha256(report_path.read_bytes()).hexdigest()
+    provenance_path.write_text(json.dumps(provenance), encoding="utf-8")
+
+    verify_demo(DEMO / "expected", actual)
 
 
 @pytest.mark.parametrize("filename", ["benchmark.json", "benchmark.md", "benchmark.provenance.json"])
