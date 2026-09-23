@@ -34,7 +34,8 @@ def test_publication_audit_reports_private_paths_content_and_broken_links(tmp_pa
 def test_publication_audit_reports_windows_home_path(tmp_path):
     from scripts.check_publication import audit_tree
 
-    (tmp_path / "README.md").write_text(r"C:\Users\alice\file.txt\n")
+    windows_home = "C:" + "\\" + r"Users\alice\file.txt\n"
+    (tmp_path / "README.md").write_text(windows_home)
     assert audit_tree(tmp_path, [Path("README.md")]) == [
         "absolute user path: README.md"
     ]

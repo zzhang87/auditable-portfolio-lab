@@ -152,7 +152,7 @@ def test_readiness_requires_full_fixed_core_universe_despite_coverage_metadata()
     assert "HKG-HSCEI" in report["readiness"]["missing_core_assets"]
 
 
-def test_markdown_escapes_metadata_and_writer_is_private_test_route(tmp_path):
+def test_markdown_escapes_metadata_and_writer_requires_demo_opt_in(tmp_path):
     from pcopt.benchmark import evaluate_benchmarks, render_benchmark_markdown, write_benchmark_report
 
     report = evaluate_benchmarks(_dataset(), {"us": {"USA-LCB": 1.0}}, base_currency="USD", as_of=date(2026, 1, 1))
@@ -173,7 +173,7 @@ def test_markdown_escapes_metadata_and_writer_is_private_test_route(tmp_path):
     assert "10y: 6; 20y: 0; 30y: 0" in markdown
     with pytest.raises(ValueError, match="synthetic"):
         write_benchmark_report(report, tmp_path)
-    write_benchmark_report(report, tmp_path, _allow_synthetic_for_tests=True)
+    write_benchmark_report(report, tmp_path, allow_synthetic_demo=True)
     parsed = json.loads((tmp_path / "benchmark.json").read_text())
     assert parsed["dataset_id"] == "synthetic-id"
     provenance = json.loads((tmp_path / "benchmark.provenance.json").read_text())

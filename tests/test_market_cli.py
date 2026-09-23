@@ -50,6 +50,7 @@ def _production_bundle(root: Path) -> Path:
     for key, path in {"annual_nominal": nominal, "inflation": inflation, "references": references}.items():
         manifest["input_files"][key]["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
     manifest["data_kind"] = "market"
+    manifest["fx_metadata"]["series"] = {"CNY": "observed", "HKD": "observed"}
     manifest["series"]["US-EQ"]["first_year"] = 2021
     manifest["dataset_id"] = dataset_identity(manifest)
     input_path.write_text(json.dumps(manifest))

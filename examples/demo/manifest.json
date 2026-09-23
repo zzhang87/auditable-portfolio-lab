@@ -1,0 +1,128 @@
+{
+  "assumptions": [
+    "Synthetic demonstration data; not historical market evidence",
+    "Annual rebalancing; taxes and transaction costs are not modeled"
+  ],
+  "coverage": {
+    "complete_shared_years": 11,
+    "first_complete_year": 2015,
+    "latest_complete_year": 2025,
+    "minimum_shared_years": 10,
+    "required_assets": [
+      "DEMO-GROWTH",
+      "DEMO-DEFENSIVE"
+    ],
+    "scope": "Synthetic product demonstration only"
+  },
+  "coverage_as_of": "2026-01-01",
+  "data_kind": "synthetic_test",
+  "dataset_id": "ce5602c8dcf46be0c3f60d35884312a7935e4b2cbb9a5436b6c950fb41d77522",
+  "fx_metadata": {
+    "observation_timing": "synthetic year-end observation",
+    "quote_orientation": "units_per_USD",
+    "series": {
+      "CNY": "synthetic",
+      "HKD": "synthetic"
+    }
+  },
+  "inflation_metadata": {
+    "CNY": {
+      "basis": "December-over-December",
+      "geography": "China",
+      "seasonal_adjustment": "not seasonally adjusted",
+      "units": "decimal_change"
+    },
+    "USD": {
+      "basis": "December-over-December",
+      "geography": "United States",
+      "seasonal_adjustment": "not seasonally adjusted",
+      "units": "decimal_change"
+    }
+  },
+  "input_files": {
+    "annual_nominal": {
+      "path": "annual_nominal.csv",
+      "sha256": "6bf26c22364ccdf5d80c6619b2fd05d5bbb86aebc142547c2744c2e4508e5fb6"
+    },
+    "fx_daily": {
+      "path": "fx_daily.csv",
+      "sha256": "cdbf18f084e4007fd00294909502d987727c021debda527904f6cd0f50201a84"
+    },
+    "inflation": {
+      "path": "inflation.csv",
+      "sha256": "e97db907f2c284fb44a1edd047575b7d93d1ac4ab81c1f0b3959c38d2f9a1b99"
+    },
+    "references": {
+      "path": "references.csv",
+      "sha256": "5362738c4601ae23e62905d0f93011d6b42c7c7ecc12f58cae1a7c25c1ce4b03"
+    }
+  },
+  "raw_files": [
+    {
+      "access_basis": "repository-authored CC0 synthetic values",
+      "normalization_recipe": "fixed values written without transformation",
+      "path": "evidence.txt",
+      "retrieved_at": "2026-09-23T00:00:00Z",
+      "sha256": "7b612314c8d0afdcf6c70a2d047a065e2441b02141734981387028b73cc9d219",
+      "source_url": "synthetic://repository-authored-demo"
+    }
+  ],
+  "schema_version": 1,
+  "series": {
+    "DEMO-DEFENSIVE": {
+      "annualization_recipe": "fixed repository-authored annual demonstration values",
+      "asset_family": "bond",
+      "asset_id": "DEMO-DEFENSIVE",
+      "backfill_start_date": null,
+      "currency": "USD",
+      "economic_exposure": "Synthetic defensive assets",
+      "fee_basis": "gross_of_fund_fees",
+      "fee_notes": "No fees; repository-authored synthetic demonstration series",
+      "first_year": 2015,
+      "frequency": "annual",
+      "hedge_status": "unhedged",
+      "is_proxy": true,
+      "last_year": 2025,
+      "launch_date": null,
+      "limitations": [
+        "Synthetic demonstration data; not historical market evidence"
+      ],
+      "listing_market": "synthetic",
+      "methodology_url": "https://github.com/zzhang87/auditable-portfolio-lab/blob/main/docs/data-and-limitations.md",
+      "period_end_convention": "synthetic calendar-year return",
+      "return_kind": "gross_total_return",
+      "series_id": "DEMO-DEFENSIVE-TR",
+      "source_id": "REPOSITORY-AUTHORED-SYNTHETIC-DEMO",
+      "source_url": "https://github.com/zzhang87/auditable-portfolio-lab/tree/main/examples/demo",
+      "status": "validated"
+    },
+    "DEMO-GROWTH": {
+      "annualization_recipe": "fixed repository-authored annual demonstration values",
+      "asset_family": "equity",
+      "asset_id": "DEMO-GROWTH",
+      "backfill_start_date": null,
+      "currency": "USD",
+      "economic_exposure": "Synthetic growth assets",
+      "fee_basis": "gross_of_fund_fees",
+      "fee_notes": "No fees; repository-authored synthetic demonstration series",
+      "first_year": 2015,
+      "frequency": "annual",
+      "hedge_status": "unhedged",
+      "is_proxy": true,
+      "last_year": 2025,
+      "launch_date": null,
+      "limitations": [
+        "Synthetic demonstration data; not historical market evidence"
+      ],
+      "listing_market": "synthetic",
+      "methodology_url": "https://github.com/zzhang87/auditable-portfolio-lab/blob/main/docs/data-and-limitations.md",
+      "period_end_convention": "synthetic calendar-year return",
+      "return_kind": "gross_total_return",
+      "series_id": "DEMO-GROWTH-TR",
+      "source_id": "REPOSITORY-AUTHORED-SYNTHETIC-DEMO",
+      "source_url": "https://github.com/zzhang87/auditable-portfolio-lab/tree/main/examples/demo",
+      "status": "validated"
+    }
+  },
+  "transformation_version": "synthetic-demo-v1"
+}

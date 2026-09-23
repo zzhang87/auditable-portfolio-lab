@@ -114,7 +114,7 @@ def _synthetic_bundle(root: Path) -> tuple[Path, dict]:
         "fx_metadata": {
             "quote_orientation": "units_per_USD",
             "observation_timing": "New York noon",
-            "series": {"CNY": "observed", "HKD": "observed"},
+            "series": {"CNY": "synthetic", "HKD": "synthetic"},
         },
         "assumptions": ["Synthetic fixture; never publish as market data"],
     }
@@ -145,6 +145,17 @@ def test_default_loading_rejects_synthetic_data(tmp_path):
 
     path, _ = _synthetic_bundle(tmp_path)
     with pytest.raises(ValueError, match="synthetic"):
+        load_market_dataset(path)
+
+
+def test_synthetic_fx_labels_cannot_be_promoted_to_market(tmp_path):
+    from pcopt.market_data import load_market_dataset
+
+    path, manifest = _synthetic_bundle(tmp_path)
+    load_market_dataset(path, allow_synthetic=True)
+    manifest["data_kind"] = "market"
+    path = _write_manifest(tmp_path, manifest)
+    with pytest.raises(ValueError, match="market data requires observed FX"):
         load_market_dataset(path)
 
 
@@ -203,7 +214,8 @@ def test_nominal_table_rejects_invalid_rows(tmp_path, content, message):
         (lambda m: m["series"]["US-EQ"].update(first_year=2021), "date bounds"),
         (lambda m: m["inflation_metadata"]["USD"].update(geography="China"), "CPI geography"),
         (lambda m: m["inflation_metadata"]["USD"].update(basis="annual average"), "December-over-December"),
-        (lambda m: m["fx_metadata"]["series"].update(HKD="fixed"), "observed HKD"),
+        (lambda m: m["fx_metadata"]["series"].update(HKD="fixed"), "synthetic FX series labels"),
+        (lambda m: m["fx_metadata"]["series"].update(CNY="observed"), "synthetic FX series labels"),
     ],
 )
 def test_manifest_rejects_invalid_metadata(tmp_path, mutation, message):
@@ -266,6 +278,7 @@ def test_every_selected_production_series_requires_three_reference_years(
     _, manifest = _synthetic_bundle(tmp_path)
     manifest["data_kind"] = "market"
     manifest["coverage"] = coverage
+    manifest["fx_metadata"]["series"] = {"CNY": "observed", "HKD": "observed"}
     path = _write_manifest(tmp_path, manifest)
     with pytest.raises(ValueError, match="at least three.*US-EQ"):
         load_market_dataset(path)

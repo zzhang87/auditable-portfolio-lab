@@ -1,0 +1,766 @@
+{
+  "coverage": {
+    "complete_shared_years": 11,
+    "first_complete_year": 2015,
+    "latest_complete_year": 2025,
+    "minimum_shared_years": 10,
+    "required_assets": [
+      "DEMO-GROWTH",
+      "DEMO-DEFENSIVE"
+    ],
+    "scope": "Synthetic product demonstration only"
+  },
+  "data_kind": "synthetic_test",
+  "dataset_id": "ce5602c8dcf46be0c3f60d35884312a7935e4b2cbb9a5436b6c950fb41d77522",
+  "evaluation": {
+    "as_of": "2026-01-01",
+    "end_year": 2025,
+    "excluded_ranges": [],
+    "observations": 11,
+    "rebalancing": "annual",
+    "start_year": 2015,
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  "provenance": {
+    "fx": {
+      "metadata": {
+        "observation_timing": "synthetic year-end observation",
+        "quote_orientation": "units_per_USD",
+        "series": {
+          "CNY": "synthetic",
+          "HKD": "synthetic"
+        }
+      },
+      "selected_endpoints": [
+        {
+          "CNY": 6.12,
+          "HKD": 7.75,
+          "observed_date": "2014-12-31",
+          "year": 2014
+        },
+        {
+          "CNY": 6.49,
+          "HKD": 7.75,
+          "observed_date": "2015-12-31",
+          "year": 2015
+        },
+        {
+          "CNY": 6.94,
+          "HKD": 7.75,
+          "observed_date": "2016-12-31",
+          "year": 2016
+        },
+        {
+          "CNY": 6.51,
+          "HKD": 7.81,
+          "observed_date": "2017-12-31",
+          "year": 2017
+        },
+        {
+          "CNY": 6.88,
+          "HKD": 7.83,
+          "observed_date": "2018-12-31",
+          "year": 2018
+        },
+        {
+          "CNY": 6.96,
+          "HKD": 7.79,
+          "observed_date": "2019-12-31",
+          "year": 2019
+        },
+        {
+          "CNY": 6.53,
+          "HKD": 7.75,
+          "observed_date": "2020-12-31",
+          "year": 2020
+        },
+        {
+          "CNY": 6.37,
+          "HKD": 7.8,
+          "observed_date": "2021-12-31",
+          "year": 2021
+        },
+        {
+          "CNY": 6.9,
+          "HKD": 7.8,
+          "observed_date": "2022-12-31",
+          "year": 2022
+        },
+        {
+          "CNY": 7.1,
+          "HKD": 7.81,
+          "observed_date": "2023-12-31",
+          "year": 2023
+        },
+        {
+          "CNY": 7.3,
+          "HKD": 7.77,
+          "observed_date": "2024-12-31",
+          "year": 2024
+        },
+        {
+          "CNY": 6.99,
+          "HKD": 7.78,
+          "observed_date": "2025-12-31",
+          "year": 2025
+        }
+      ]
+    },
+    "inflation": {
+      "metadata": {
+        "CNY": {
+          "basis": "December-over-December",
+          "geography": "China",
+          "seasonal_adjustment": "not seasonally adjusted",
+          "units": "decimal_change"
+        },
+        "USD": {
+          "basis": "December-over-December",
+          "geography": "United States",
+          "seasonal_adjustment": "not seasonally adjusted",
+          "units": "decimal_change"
+        }
+      },
+      "selected_observations": {
+        "CNY": [
+          {
+            "inflation": 0.016,
+            "year": 2015
+          },
+          {
+            "inflation": 0.021,
+            "year": 2016
+          },
+          {
+            "inflation": 0.018,
+            "year": 2017
+          },
+          {
+            "inflation": 0.019,
+            "year": 2018
+          },
+          {
+            "inflation": 0.045,
+            "year": 2019
+          },
+          {
+            "inflation": 0.002,
+            "year": 2020
+          },
+          {
+            "inflation": 0.015,
+            "year": 2021
+          },
+          {
+            "inflation": 0.018,
+            "year": 2022
+          },
+          {
+            "inflation": -0.003,
+            "year": 2023
+          },
+          {
+            "inflation": 0.001,
+            "year": 2024
+          },
+          {
+            "inflation": 0.008,
+            "year": 2025
+          }
+        ],
+        "USD": [
+          {
+            "inflation": 0.001,
+            "year": 2015
+          },
+          {
+            "inflation": 0.021,
+            "year": 2016
+          },
+          {
+            "inflation": 0.021,
+            "year": 2017
+          },
+          {
+            "inflation": 0.019,
+            "year": 2018
+          },
+          {
+            "inflation": 0.023,
+            "year": 2019
+          },
+          {
+            "inflation": 0.014,
+            "year": 2020
+          },
+          {
+            "inflation": 0.07,
+            "year": 2021
+          },
+          {
+            "inflation": 0.065,
+            "year": 2022
+          },
+          {
+            "inflation": 0.034,
+            "year": 2023
+          },
+          {
+            "inflation": 0.029,
+            "year": 2024
+          },
+          {
+            "inflation": 0.027,
+            "year": 2025
+          }
+        ]
+      }
+    }
+  },
+  "readiness": {
+    "complete_shared_years": 0,
+    "minimum_complete_shared_years": 10,
+    "missing_core_assets": [
+      "CHN-A-CSI300",
+      "CHN-CASH",
+      "CHN-GOV",
+      "GLO-GLD",
+      "HKG-HSCEI",
+      "HKG-HSI",
+      "USA-BIL",
+      "USA-ITT",
+      "USA-LCB"
+    ],
+    "production_data_required": true,
+    "required_core_assets": [
+      "USA-LCB",
+      "USA-ITT",
+      "USA-BIL",
+      "CHN-A-CSI300",
+      "CHN-GOV",
+      "CHN-CASH",
+      "HKG-HSI",
+      "HKG-HSCEI",
+      "GLO-GLD"
+    ],
+    "status": "incomplete"
+  },
+  "reproduce": {
+    "argv": [
+      "pcopt",
+      "benchmark",
+      "--manifest",
+      "examples/demo/manifest.json",
+      "--weights",
+      "examples/demo/portfolio.json",
+      "--base-currency",
+      "both",
+      "--output-dir",
+      "examples/demo/expected",
+      "--as-of",
+      "2026-01-01",
+      "--allow-synthetic-demo"
+    ],
+    "cwd_policy": "run from the repository root",
+    "runnable": true,
+    "shell_display": "pcopt benchmark --manifest examples/demo/manifest.json --weights examples/demo/portfolio.json --base-currency both --output-dir examples/demo/expected --as-of 2026-01-01 --allow-synthetic-demo"
+  },
+  "schema_version": 1,
+  "source_assumptions": {
+    "dataset": [
+      "Synthetic demonstration data; not historical market evidence",
+      "Annual rebalancing; taxes and transaction costs are not modeled"
+    ],
+    "fees": "Per-series fee_basis and fee_notes; taxes are not modeled",
+    "series": {
+      "DEMO-DEFENSIVE": {
+        "annualization_recipe": "fixed repository-authored annual demonstration values",
+        "asset_family": "bond",
+        "asset_id": "DEMO-DEFENSIVE",
+        "backfill_start_date": null,
+        "currency": "USD",
+        "economic_exposure": "Synthetic defensive assets",
+        "fee_basis": "gross_of_fund_fees",
+        "fee_notes": "No fees; repository-authored synthetic demonstration series",
+        "first_year": 2015,
+        "frequency": "annual",
+        "hedge_status": "unhedged",
+        "is_proxy": true,
+        "last_year": 2025,
+        "launch_date": null,
+        "limitations": [
+          "Synthetic demonstration data; not historical market evidence"
+        ],
+        "listing_market": "synthetic",
+        "methodology_url": "https://github.com/zzhang87/auditable-portfolio-lab/blob/main/docs/data-and-limitations.md",
+        "period_end_convention": "synthetic calendar-year return",
+        "return_kind": "gross_total_return",
+        "series_id": "DEMO-DEFENSIVE-TR",
+        "source_id": "REPOSITORY-AUTHORED-SYNTHETIC-DEMO",
+        "source_url": "https://github.com/zzhang87/auditable-portfolio-lab/tree/main/examples/demo",
+        "status": "validated"
+      },
+      "DEMO-GROWTH": {
+        "annualization_recipe": "fixed repository-authored annual demonstration values",
+        "asset_family": "equity",
+        "asset_id": "DEMO-GROWTH",
+        "backfill_start_date": null,
+        "currency": "USD",
+        "economic_exposure": "Synthetic growth assets",
+        "fee_basis": "gross_of_fund_fees",
+        "fee_notes": "No fees; repository-authored synthetic demonstration series",
+        "first_year": 2015,
+        "frequency": "annual",
+        "hedge_status": "unhedged",
+        "is_proxy": true,
+        "last_year": 2025,
+        "launch_date": null,
+        "limitations": [
+          "Synthetic demonstration data; not historical market evidence"
+        ],
+        "listing_market": "synthetic",
+        "methodology_url": "https://github.com/zzhang87/auditable-portfolio-lab/blob/main/docs/data-and-limitations.md",
+        "period_end_convention": "synthetic calendar-year return",
+        "return_kind": "gross_total_return",
+        "series_id": "DEMO-GROWTH-TR",
+        "source_id": "REPOSITORY-AUTHORED-SYNTHETIC-DEMO",
+        "source_url": "https://github.com/zzhang87/auditable-portfolio-lab/tree/main/examples/demo",
+        "status": "validated"
+      }
+    }
+  },
+  "views": {
+    "CNY": {
+      "inflation_basis": "December-over-December",
+      "portfolios": {
+        "balanced_demo": {
+          "availability": {
+            "rolling_cagr": {
+              "available_years": 11,
+              "overlapping": true,
+              "required_years": 10,
+              "status": "available",
+              "windows": 2
+            },
+            "start_date_sensitivity": {
+              "available_years": 11,
+              "overlapping": true,
+              "reason": "insufficient complete annual observations",
+              "required_years": 20,
+              "status": "unavailable",
+              "windows": 0
+            },
+            "withdrawal": {
+              "available_years": 11,
+              "overlapping": true,
+              "reason": "insufficient complete annual observations",
+              "required_years": 30,
+              "status": "unavailable",
+              "windows": 0
+            }
+          },
+          "metrics": {
+            "nominal": {
+              "average_return": 0.048560909454933236,
+              "cagr": 0.0470804084052443,
+              "deepest_drawdown": -0.040282574568288876,
+              "longest_drawdown_years": 3.0,
+              "rolling_cagr_baseline": 0.04156889251476729,
+              "rolling_cagr_max": 0.051181109720499496,
+              "rolling_cagr_median": 0.0455268643053629,
+              "rolling_cagr_min": 0.03987261889022631,
+              "rolling_cagr_stretch": 0.049484836095958516,
+              "standard_deviation": 0.05862053886190189,
+              "standard_max_drawdown": -0.040282574568288765,
+              "ulcer_index": 0.012145653221138772
+            },
+            "real": {
+              "average_return": 0.033604241967289,
+              "cagr": 0.03214575944220943,
+              "deepest_drawdown": -0.06494854921034432,
+              "longest_drawdown_years": 3.0,
+              "rolling_cagr_baseline": 0.026744806802263175,
+              "rolling_cagr_max": 0.03552526594495742,
+              "rolling_cagr_median": 0.030360289978666688,
+              "rolling_cagr_min": 0.025195314012375958,
+              "rolling_cagr_stretch": 0.0339757731550702,
+              "standard_deviation": 0.057738768763799984,
+              "standard_max_drawdown": -0.06494854921034443,
+              "ulcer_index": 0.0201045862628013
+            }
+          },
+          "nominal_cagr": 0.0470804084052443,
+          "nominal_cumulative_return": 0.6587478421635007,
+          "nominal_returns": {
+            "2015": 0.1219640522875817,
+            "2016": 0.0513725731895224,
+            "2017": 0.025090489913544588,
+            "2018": 0.0061075268817204036,
+            "2019": 0.13221395348837217,
+            "2020": 0.011774712643678286,
+            "2021": 0.006713629402756591,
+            "2022": -0.04028257456828885,
+            "2023": 0.11747826086956509,
+            "2024": 0.09479436619718301,
+            "2025": 0.006943013698630151
+          },
+          "nominal_wealth": [
+            {
+              "value": 1.0,
+              "year": "initial"
+            },
+            {
+              "value": 1.1219640522875818,
+              "year": 2015
+            },
+            {
+              "value": 1.1796022326797388,
+              "year": 2016
+            },
+            {
+              "value": 1.2091990306007847,
+              "year": 2017
+            },
+            {
+              "value": 1.2165842461855292,
+              "year": 2018
+            },
+            {
+              "value": 1.377433659125389,
+              "year": 2019
+            },
+            {
+              "value": 1.3936525446473207,
+              "year": 2020
+            },
+            {
+              "value": 1.4030090113482914,
+              "year": 2021
+            },
+            {
+              "value": 1.3464921962286727,
+              "year": 2022
+            },
+            {
+              "value": 1.5046757577160583,
+              "year": 2023
+            },
+            {
+              "value": 1.6473105425010182,
+              "year": 2024
+            },
+            {
+              "value": 1.6587478421635007,
+              "year": 2025
+            }
+          ],
+          "real_cagr": 0.03214575944220943,
+          "real_cumulative_return": 0.41628729325829106,
+          "real_returns": {
+            "2015": 0.10429532705470637,
+            "2016": 0.02974786796231399,
+            "2017": 0.006965117793265824,
+            "2018": -0.012652083531186985,
+            "2019": 0.08345832869700696,
+            "2020": 0.009755202239199921,
+            "2021": -0.008163911918466263,
+            "2022": -0.05725203788633482,
+            "2023": 0.12084078321922265,
+            "2024": 0.0937006655316515,
+            "2025": -0.0010485975212002358
+          },
+          "real_wealth": [
+            {
+              "value": 1.0,
+              "year": "initial"
+            },
+            {
+              "value": 1.1042953270547065,
+              "year": 2015
+            },
+            {
+              "value": 1.1371457586353302,
+              "year": 2016
+            },
+            {
+              "value": 1.145066112792338,
+              "year": 2017
+            },
+            {
+              "value": 1.130578640684558,
+              "year": 2018
+            },
+            {
+              "value": 1.224934844496625,
+              "year": 2019
+            },
+            {
+              "value": 1.2368843316345326,
+              "year": 2020
+            },
+            {
+              "value": 1.2267865168977372,
+              "year": 2021
+            },
+            {
+              "value": 1.1565504887538631,
+              "year": 2022
+            },
+            {
+              "value": 1.2963089556474547,
+              "year": 2023
+            },
+            {
+              "value": 1.4177739675262613,
+              "year": 2024
+            },
+            {
+              "value": 1.416287293258291,
+              "year": 2025
+            }
+          ],
+          "risk_sampling": "annual year-end observations",
+          "weights": {
+            "DEMO-DEFENSIVE": 0.4,
+            "DEMO-GROWTH": 0.6
+          }
+        }
+      },
+      "years": [
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ]
+    },
+    "USD": {
+      "inflation_basis": "December-over-December",
+      "portfolios": {
+        "balanced_demo": {
+          "availability": {
+            "rolling_cagr": {
+              "available_years": 11,
+              "overlapping": true,
+              "required_years": 10,
+              "status": "available",
+              "windows": 2
+            },
+            "start_date_sensitivity": {
+              "available_years": 11,
+              "overlapping": true,
+              "reason": "insufficient complete annual observations",
+              "required_years": 20,
+              "status": "unavailable",
+              "windows": 0
+            },
+            "withdrawal": {
+              "available_years": 11,
+              "overlapping": true,
+              "reason": "insufficient complete annual observations",
+              "required_years": 30,
+              "status": "unavailable",
+              "windows": 0
+            }
+          },
+          "metrics": {
+            "nominal": {
+              "average_return": 0.03672727272727274,
+              "cagr": 0.034504151722302145,
+              "deepest_drawdown": -0.11399999999999999,
+              "longest_drawdown_years": 3.0,
+              "rolling_cagr_baseline": 0.03227742904778552,
+              "rolling_cagr_max": 0.03280992801167382,
+              "rolling_cagr_median": 0.03249669332703364,
+              "rolling_cagr_min": 0.03218345864239347,
+              "rolling_cagr_stretch": 0.032715957606281765,
+              "standard_deviation": 0.06953924202792396,
+              "standard_max_drawdown": -0.11399999999999999,
+              "ulcer_index": 0.03932542829449483
+            },
+            "real": {
+              "average_return": 0.007953301895347863,
+              "cagr": 0.005087279162990566,
+              "deepest_drawdown": -0.19762011320258,
+              "longest_drawdown_years": 9.0,
+              "rolling_cagr_baseline": 0.0005201636209397841,
+              "rolling_cagr_max": 0.0032199054482540124,
+              "rolling_cagr_median": 0.0016318220204221134,
+              "rolling_cagr_min": 4.373859259021451e-05,
+              "rolling_cagr_stretch": 0.0027434804199044428,
+              "standard_deviation": 0.07738621653560529,
+              "standard_max_drawdown": -0.19762011320258,
+              "ulcer_index": 0.09466443690425
+            }
+          },
+          "nominal_cagr": 0.034504151722302145,
+          "nominal_cumulative_return": 0.45229424807448115,
+          "nominal_returns": {
+            "2015": 0.05800000000000001,
+            "2016": -0.016800000000000016,
+            "2017": 0.09280000000000008,
+            "2018": -0.048000000000000015,
+            "2019": 0.11919999999999997,
+            "2020": 0.07840000000000003,
+            "2021": 0.03200000000000003,
+            "2022": -0.11400000000000003,
+            "2023": 0.08600000000000003,
+            "2024": 0.06480000000000001,
+            "2025": 0.05160000000000005
+          },
+          "nominal_wealth": [
+            {
+              "value": 1.0,
+              "year": "initial"
+            },
+            {
+              "value": 1.058,
+              "year": 2015
+            },
+            {
+              "value": 1.0402256,
+              "year": 2016
+            },
+            {
+              "value": 1.13675853568,
+              "year": 2017
+            },
+            {
+              "value": 1.08219412596736,
+              "year": 2018
+            },
+            {
+              "value": 1.2111916657826693,
+              "year": 2019
+            },
+            {
+              "value": 1.3061490923800307,
+              "year": 2020
+            },
+            {
+              "value": 1.3479458633361918,
+              "year": 2021
+            },
+            {
+              "value": 1.194280034915866,
+              "year": 2022
+            },
+            {
+              "value": 1.2969881179186304,
+              "year": 2023
+            },
+            {
+              "value": 1.3810329479597576,
+              "year": 2024
+            },
+            {
+              "value": 1.4522942480744812,
+              "year": 2025
+            }
+          ],
+          "real_cagr": 0.005087279162990566,
+          "real_cumulative_return": 0.05740543996126668,
+          "real_returns": {
+            "2015": 0.05694305694305704,
+            "2016": -0.03702252693437802,
+            "2017": 0.0703232125367288,
+            "2018": -0.06575073601570158,
+            "2019": 0.094037145650049,
+            "2020": 0.06351084812623276,
+            "2021": -0.03551401869158879,
+            "2022": -0.16807511737089204,
+            "2023": 0.050290135396518346,
+            "2024": 0.03479105928085535,
+            "2025": 0.023953261927945623
+          },
+          "real_wealth": [
+            {
+              "value": 1.0,
+              "year": "initial"
+            },
+            {
+              "value": 1.0569430569430571,
+              "year": 2015
+            },
+            {
+              "value": 1.017812354149279,
+              "year": 2016
+            },
+            {
+              "value": 1.0893881886526269,
+              "year": 2017
+            },
+            {
+              "value": 1.0177601134419048,
+              "year": 2018
+            },
+            {
+              "value": 1.1134673694664516,
+              "year": 2019
+            },
+            {
+              "value": 1.1841846264621514,
+              "year": 2020
+            },
+            {
+              "value": 1.1421294715036825,
+              "year": 2021
+            },
+            {
+              "value": 0.9501659265279461,
+              "year": 2022
+            },
+            {
+              "value": 0.9979498996221948,
+              "year": 2023
+            },
+            {
+              "value": 1.0326696337392742,
+              "year": 2024
+            },
+            {
+              "value": 1.0574054399612667,
+              "year": 2025
+            }
+          ],
+          "risk_sampling": "annual year-end observations",
+          "weights": {
+            "DEMO-DEFENSIVE": 0.4,
+            "DEMO-GROWTH": 0.6
+          }
+        }
+      },
+      "years": [
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ]
+    }
+  }
+}

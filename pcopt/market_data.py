@@ -324,8 +324,12 @@ def load_market_dataset(
     fx_metadata = manifest["fx_metadata"]
     if fx_metadata.get("quote_orientation") != "units_per_USD":
         raise ValueError("FX quote orientation must be units_per_USD")
-    if fx_metadata.get("series", {}).get("HKD") != "observed":
-        raise ValueError("FX metadata requires observed HKD rates")
+    fx_series = fx_metadata.get("series", {})
+    expected_fx_kind = "observed" if manifest["data_kind"] == "market" else "synthetic"
+    if any(fx_series.get(currency) != expected_fx_kind for currency in ("CNY", "HKD")):
+        if manifest["data_kind"] == "market":
+            raise ValueError("market data requires observed FX series")
+        raise ValueError("synthetic data requires synthetic FX series labels")
 
     inflation = _read_exact_csv(paths["inflation"], ["year", "USD", "CNY"], "inflation")
     inflation["year"] = _integer_years(inflation["year"], "inflation")

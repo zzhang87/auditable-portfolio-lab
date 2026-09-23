@@ -499,10 +499,10 @@ def _atomic_write(path: Path, content: bytes) -> None:
 
 
 def write_benchmark_report(
-    report: dict, output_dir: str | Path, *, _allow_synthetic_for_tests: bool = False
+    report: dict, output_dir: str | Path, *, allow_synthetic_demo: bool = False
 ) -> None:
-    if report.get("data_kind") != "market" and not _allow_synthetic_for_tests:
-        raise ValueError("synthetic datasets cannot be written as production reports")
+    if report.get("data_kind") != "market" and not allow_synthetic_demo:
+        raise ValueError("synthetic datasets require explicit demo opt-in")
     root = Path(output_dir)
     json_bytes = (json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
     markdown_bytes = render_benchmark_markdown(report).encode("utf-8")

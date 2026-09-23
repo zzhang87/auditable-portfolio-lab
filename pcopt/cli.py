@@ -122,6 +122,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Qualification cutoff (required for raw manifests; built bundles default to coverage_as_of)",
     )
     benchmark.add_argument("--output-dir", required=True, type=Path)
+    benchmark.add_argument(
+        "--allow-synthetic-demo",
+        action="store_true",
+        help="Explicitly allow a synthetic_test manifest and label the report non-production",
+    )
     benchmark.set_defaults(handler=run_benchmark)
     return parser
 
@@ -244,7 +249,7 @@ def run_benchmark(args: argparse.Namespace) -> dict:
     manifest_path = args.manifest.resolve()
     weights_path = args.weights.resolve()
     output_path = args.output_dir.resolve()
-    dataset = load_market_dataset(manifest_path)
+    dataset = load_market_dataset(manifest_path, allow_synthetic=args.allow_synthetic_demo)
     coverage_as_of = dataset.manifest.get("coverage_as_of")
     if args.as_of is None and coverage_as_of is None:
         raise ValueError("--as-of is required for a raw manifest without coverage_as_of")
@@ -263,7 +268,7 @@ def run_benchmark(args: argparse.Namespace) -> dict:
         report["evaluation"]["as_of"],
         Path.cwd(),
     )
-    write_benchmark_report(report, output_path)
+    write_benchmark_report(report, output_path, allow_synthetic_demo=args.allow_synthetic_demo)
     return report
 
 
