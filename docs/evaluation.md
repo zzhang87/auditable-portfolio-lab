@@ -11,9 +11,7 @@ Evaluation checks calculation invariants, data boundaries, and reproducible outp
 | Integration and CLI | Relocatable dataset builds, explicit cutoffs, command replay, report creation, and local version persistence | [Market CLI](../tests/test_market_cli.py), [benchmark](../tests/test_benchmark.py), [storage](../tests/test_storage.py) |
 | Demo semantic replay | Synthetic opt-in, tamper rejection, semantic equivalence, required artifacts, and report checksums | [Demo](../tests/test_demo.py) |
 | Presentation | PNG generation, required currency views, portfolio selection, and aligned years | [Visualization](../tests/test_visualization.py) |
-| Publication audit | Forbidden tracked paths, known private-path patterns, and broken relative Markdown file links | [Publication](../tests/test_publication.py) |
-
-The documentation contract in publication tests checks required evidence sections. It does not establish that every prose claim is accurate; reviewers must follow the linked evidence.
+| Publication audit | Forbidden tracked paths, known private-path patterns, removed positioning language, and broken relative Markdown file links | [Publication](../tests/test_publication.py) |
 
 ### Demo semantic replay
 

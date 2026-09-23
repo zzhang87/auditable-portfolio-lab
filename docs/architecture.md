@@ -4,7 +4,7 @@
 
 Auditable Portfolio Lab is a command-line research tool for fixed-allocation benchmarks, portfolio metrics, constrained optimization, and local portfolio versioning. Its central output is an inspectable result with assumptions and provenance. It is research software, not investment advice; see [data and limitations](data-and-limitations.md).
 
-The public demonstration uses repository-authored synthetic values. It exercises the product workflow without establishing historical performance or market-data readiness. The [checked-in demo report](../reports/example/benchmark.md) and [demo tests](../tests/test_demo.py) expose that boundary.
+The bundled sample uses repository-authored synthetic values. It exercises the product workflow without establishing historical performance or market-data readiness. The [checked-in sample report](../reports/example/benchmark.md) and [sample tests](../tests/test_demo.py) expose that boundary.
 
 ## Data Flow
 
@@ -58,4 +58,4 @@ Not every limitation is an exception: insufficient horizons become explicit unav
 
 Reproduction depends on the same input bytes, manifest identity, explicit cutoff, portfolio definitions, and calculation settings. [CLI tests](../tests/test_market_cli.py) cover relocation, clock-independent cutoffs, recorded command replay, and byte-identical repeated reports in controlled conditions. [Demo verification](../pcopt/demo.py) compares semantic fields including provenance and readiness, then checks actual report bytes against their sidecar. Replay-path fields are excluded from semantic comparison and have [separate tests](../tests/test_replay.py).
 
-This contract does not assert byte-identical outputs for arbitrary dependency versions or validate a source's financial claims. The [evaluation guide](evaluation.md) provides the runnable checks; the [AI development cases](ai-assisted-development.md) explain how these acceptance boundaries shaped implementation.
+This contract does not assert byte-identical outputs for arbitrary dependency versions or validate a source's financial claims. The [evaluation guide](evaluation.md) provides the runnable checks, and [data and limitations](data-and-limitations.md) defines the interpretation and redistribution boundaries.

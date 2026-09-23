@@ -1,130 +1,169 @@
 # Auditable Portfolio Lab
 
-An auditable cross-market portfolio research engine built through AI-assisted development, with deterministic validation, explicit data provenance, reproducible reports, and honest limitations.
+A local-first Python toolkit for evaluating fixed-allocation portfolios across currencies with explicit data lineage, inflation-adjusted results, and reproducible reports.
 
 [![CI](https://github.com/zzhang87/auditable-portfolio-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/zzhang87/auditable-portfolio-lab/actions/workflows/ci.yml)
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
 
-> **Synthetic demonstration only.** Every result in this README and chart uses repository-authored synthetic inputs, not historical performance. This is research software, not investment advice; market-data readiness remains incomplete.
+![Benchmark overview](assets/benchmark-overview.png)
 
-![Synthetic benchmark overview](assets/benchmark-overview.png)
+The chart above comes from the bundled synthetic sample. It illustrates the workflow and is not historical performance or investment advice.
 
-## What It Demonstrates
+## Why this exists
 
-Follow an input from its manifest to an inspectable purchasing-power report. The same workflow makes rejected inputs, unavailable metrics, and incomplete coverage visible.
+Cross-market portfolio analysis becomes difficult to audit when asset returns, FX conversion, inflation, data selection, and missing history are handled as unrelated spreadsheet steps. Small convention changes can alter the result without leaving a useful record of what happened.
 
-| Capability | Implementation | Checked-in evidence |
-|---|---|---|
-| Reject unqualified or altered inputs | [Manifest, metadata, and checksum validation](pcopt/market_data.py) | [Qualification and tamper tests](tests/test_market_data.py) |
-| Compare USD and CNY purchasing power | [FX and inflation conversion](pcopt/currency.py) | [Hand-checked currency cases](tests/test_currency.py) |
-| Evaluate fixed allocations with explicit assumptions | [Annual rebalancing and benchmark reports](pcopt/benchmark.py) | [Synthetic example report](reports/example/benchmark.md), [benchmark tests](tests/test_benchmark.py) |
-| Measure losses from initial wealth | [Drawdown and ulcer-index calculations](pcopt/metrics.py) | [Initial-loss regression](tests/test_metrics.py) |
-| Reproduce results and inspect provenance | [Replay handling](pcopt/replay.py), [semantic verifier](pcopt/demo.py) | [Synthetic provenance sidecar](reports/example/benchmark.provenance.json), [replay tests](tests/test_replay.py) |
+Auditable Portfolio Lab treats those choices as part of the calculation. Inputs are described by a manifest, selected data is validated before use, USD and CNY purchasing-power views share one complete interval, and every benchmark writes its assumptions and provenance alongside the results.
 
-## Five-Minute Demo
+## What it does
 
-Requires Python 3.10+ and Git. Clone the repository and enter its directory:
+| Workflow | Result |
+|---|---|
+| Validate manifests, source metadata, reference evidence, and file checksums | Unqualified or changed inputs fail before evaluation |
+| Align asset, FX, and inflation observations | One explicit complete interval for every requested view |
+| Convert returns and deflate purchasing power | Separate nominal and real results in USD and CNY |
+| Evaluate fixed weights with annual rebalancing | Return, volatility, drawdown, start-date, and withdrawal metrics when enough history exists |
+| Write Markdown, JSON, and checksum metadata | Inspectable output for people and downstream tools |
+| Search constrained allocations from prepared return tables | Seeded heuristic optimization with feasibility reported explicitly |
+| Store portfolio and run lineage locally | SQLite-backed parent/child versions and reproducible run settings |
+
+The manifest-backed benchmark and the optimizer are intentionally separate. The optimizer consumes a prepared return table; it does not silently qualify or transform market data.
+
+## Quick start
+
+Requires Python 3.10+ and Git.
 
 ```bash
 git clone https://github.com/zzhang87/auditable-portfolio-lab.git
 cd auditable-portfolio-lab
-```
-
-Run from the repository root. Installation requires package access; the benchmark itself runs offline from checked-in synthetic inputs.
-
-```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -e ".[dev,viz]"
+```
+
+Run the bundled sample from the repository root:
+
+```bash
 pcopt benchmark \
   --manifest examples/demo/manifest.json \
   --weights examples/demo/portfolio.json \
   --base-currency both \
-  --output-dir /tmp/pcopt-demo \
+  --output-dir reports/demo \
   --allow-synthetic-demo
+
+python scripts/render_demo_chart.py \
+  --report reports/demo/benchmark.json \
+  --output reports/demo/benchmark-overview.png
 ```
 
-Open `/tmp/pcopt-demo/benchmark.md` for the report, `benchmark.json` for structured results, and `benchmark.provenance.json` for artifact checksums. The [checked-in report](reports/example/benchmark.md) is available without installation. The explicit demo flag allows synthetic inputs while preserving `data_kind: synthetic_test` and incomplete readiness.
+The benchmark itself runs offline from checked-in inputs. Inspect these files afterward:
 
-## Example Output
+- `reports/demo/benchmark.md` — readable results, assumptions, availability, and coverage
+- `reports/demo/benchmark.json` — structured results and selected observations
+- `reports/demo/benchmark.provenance.json` — artifact checksums
+- `reports/demo/benchmark-overview.png` — compact visual summary
 
-**Illustrative synthetic demonstration output, not historical performance.** The [checked-in expected report](examples/demo/expected/benchmark.md) evaluates `balanced_demo` with 60% synthetic growth and 40% synthetic defensive weights, annual rebalancing, and 11 annual observations labeled 2015–2025.
+The same output is checked in under [reports/example](reports/example/) for browsing without installation.
+
+## Example result
+
+The sample evaluates a 60% synthetic growth / 40% synthetic defensive allocation using 11 annual observations labeled 2015–2025.
 
 | Purchasing-power view | Nominal CAGR | Real CAGR | Real volatility | Deepest real drawdown |
 |---|---:|---:|---:|---:|
 | USD | 3.45% | 0.51% | 7.74% | -19.76% |
 | CNY | 4.71% | 3.21% | 5.77% | -6.49% |
 
-Currency and inflation assumptions change the purchasing-power view of the same allocation. Drawdown uses year-end observations. Start-date sensitivity and withdrawal metrics remain unavailable because this synthetic interval is too short; the report states the missing horizons and incomplete core coverage.
+The allocation is unchanged between views. FX and inflation assumptions change its measured purchasing power. Start-date sensitivity and withdrawal metrics remain unavailable because the sample is too short; the generated report records the missing horizons instead of filling them with estimates.
 
-## How AI Was Used
+All bundled return, FX, inflation, and reference values are repository-authored synthetic data. See [data and limitations](docs/data-and-limitations.md) before interpreting any output.
 
-AI supports research, implementation, and review. Explicit requirements, deterministic checks, and reproducible artifacts define acceptance, with human review of scope and source suitability. Three [engineering case studies](docs/ai-assisted-development.md) connect source qualification, an initial-loss drawdown correction, and reproducible artifacts to code and tests. They document contributions and validation boundaries without claiming measured productivity gains or investment improvements caused by AI.
-
-## Architecture
+## How it works
 
 ```mermaid
 flowchart LR
-    A[Sources or supplied imports] --> B[Manifest and checksums]
+    A[Source adapters or supplied imports] --> B[Manifest and checksums]
     B --> C[Qualification and validation]
     C --> D[FX and inflation conversion]
     D --> E[Metrics and fixed-allocation benchmark]
-    E --> F[Report and provenance]
+    E --> F[Markdown, JSON, and provenance]
     G[Prepared return table] --> H[Constrained optimizer]
     H --> I[Result and local version history]
 ```
 
-The [architecture guide](docs/architecture.md) explains component boundaries, rejection rules, and the reproduction contract. The optimizer takes separately prepared returns; its command does not automatically apply benchmark data qualification.
+The [architecture guide](docs/architecture.md) describes the component boundaries, failure model, and reproduction contract.
 
-## Evaluation and Reproducibility
+## Using your own data
 
-Tests cover hand-checked metric invariants, data qualification and tampering, CLI integration, replay portability, synthetic opt-in, visualization, and publication boundaries. The [evaluation guide](docs/evaluation.md) maps these layers to evidence and release gates.
+A benchmark bundle contains:
 
-After the demo, check semantic equivalence and generated report checksums:
+- annual nominal asset returns;
+- observed year-end FX values;
+- annual inflation observations;
+- reference observations used during qualification;
+- a manifest describing series identity, return basis, currency, coverage, source metadata, and checksums;
+- one or more named portfolio weight sets.
+
+Use [examples/demo](examples/demo/) as the schema reference. The builders in [scripts](scripts/) and adapters in [pcopt/market_sources](pcopt/market_sources/) support local preparation from permitted inputs. Source access and redistribution rights remain the user's responsibility.
+
+The default benchmark path rejects synthetic inputs. `--allow-synthetic-demo` exists only for the bundled sample and preserves its `synthetic_test` identity and incomplete readiness status.
+
+## Reproducibility
+
+Verify a generated sample against the checked-in semantic result and its own artifact checksums:
 
 ```bash
 python scripts/verify_demo.py \
   --expected examples/demo/expected \
-  --actual /tmp/pcopt-demo
+  --actual reports/demo
 ```
 
-The demo manifest fixes its qualification cutoff to `2026-01-01`. Verification compares results, provenance, coverage, and readiness; replay display paths have separate tests. Matching checksums establish content identity, not source truth or authenticity. The [expected JSON](examples/demo/expected/benchmark.json) exposes the full calculation output and assumptions.
+Reproduction depends on the same input bytes, manifest identity, qualification cutoff, portfolio definition, and calculation settings. The report records the selected observations and a replay command. See [evaluation](docs/evaluation.md) for the test layers and release gates.
 
-## Data Boundary and Limitations
+## Optimization and local history
 
-The nine-core-asset US/mainland China/Hong Kong milestone is incomplete. Synthetic demo coverage does not establish market coverage. Production readiness requires the full core universe and at least 10 shared complete years; even that dataset milestone does not certify live use.
+`GeneticOptimizer` searches supplied return tables using weighted objectives, metric constraints, and a fixed random seed. Results include their feasibility status. The CLI can persist optimizer runs and portfolio versions to SQLite, including parent/child relationships and the settings needed to inspect a run later.
 
-Raw or licensed third-party inputs are not redistributed here. Adapters confer no data rights; users supply permitted inputs and review source suitability. Annual observations omit intra-year drawdowns, short histories limit horizon metrics, and the synthetic demo omits taxes and transaction costs. A heuristic optimizer does not guarantee a global optimum or a feasible trade plan.
+```bash
+pcopt optimize \
+  --returns examples/sample_annual_real_returns.csv \
+  --assets steady,growth,cash \
+  --objective cagr=1 ulcer_index=-0.2 \
+  --constraint 'standard_deviation<=0.12' \
+  --population-size 64 \
+  --generations 40 \
+  --seed 7 \
+  --db data/portfolio_versions.sqlite3
+```
 
-This is research software, **not investment advice**. Live trading, account feasibility, and personalized recommendations are outside scope. See [data terms and known limitations](docs/data-and-limitations.md).
+Run `pcopt --help` for all commands and options.
 
-## Other Workflows
+## Project status and limitations
 
-- **Constrained optimization:** [GeneticOptimizer](pcopt/optimizer.py) searches supplied return tables using objectives, constraints, and a seed. Inspect result feasibility; see [optimizer tests](tests/test_optimizer.py).
-- **Local versioning:** [SQLite storage](pcopt/storage.py) records portfolios, parent/child versions, and optimizer runs. The [CLI](pcopt/cli.py) exposes `version-show`, `version-children`, `version-roots`, and `run-show`.
-- **Public-source builders:** [Source adapters](pcopt/market_sources/), the [public proxy builder](scripts/build_public_proxy_returns.py), and the [cross-market builder](scripts/build_us_china_dataset.py) support local data preparation. Data access, qualification, and redistribution terms remain separate requirements.
+This is research software, not investment advice. The US/mainland China/Hong Kong nine-core-asset data milestone is incomplete, and the bundled sample does not establish market-data readiness. Production readiness requires the full declared core universe and at least 10 shared complete years; it still does not certify live use or investment suitability.
+
+Annual observations omit intra-year drawdowns. Short histories leave long-horizon metrics unavailable. Taxes, transaction costs, account feasibility, live trading, and personalized recommendations are outside the current scope. Optimization is heuristic and does not guarantee a global optimum.
+
+Raw or licensed third-party inputs are not redistributed here. Read [data and limitations](docs/data-and-limitations.md) for the complete boundary.
 
 ## Development
 
-With the virtual environment active, install development and optional visualization dependencies, run the full suite and lint checks, then audit the Git-tracked publication set:
-
 ```bash
-pip install -e ".[dev,viz]"
 python -m pytest
 ruff check .
+ruff format --check .
 python scripts/check_publication.py
 ```
 
-Stage intended publication files before the final audit. The scanner checks known private-path patterns and relative link targets; manual content and data-rights review remains necessary.
+Continuous integration runs the full test suite on Python 3.10, 3.12, and 3.14, builds the package, regenerates and verifies the sample, and audits the tracked publication set.
 
-Regenerate the chart from the checked-in synthetic report:
+## Documentation
 
-```bash
-python scripts/render_demo_chart.py \
-  --report reports/example/benchmark.json \
-  --output assets/benchmark-overview.png
-```
+- [Architecture](docs/architecture.md)
+- [Evaluation and release gates](docs/evaluation.md)
+- [Data terms and known limitations](docs/data-and-limitations.md)
+- [Data qualification decision](docs/decisions/001-fail-closed-data-qualification.md)
 
 ## License
 
-Code is licensed under [MIT](LICENSE). Repository-authored synthetic demo values have separate [CC0-1.0 terms](examples/demo/DATA_LICENSE.md). Neither license grants rights to third-party source data.
+Code is licensed under [MIT](LICENSE). Repository-authored synthetic sample values have separate [CC0-1.0 terms](examples/demo/DATA_LICENSE.md). Neither license grants rights to third-party source data.

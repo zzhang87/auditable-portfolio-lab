@@ -6,7 +6,7 @@ Similar-looking series can differ in return basis, fees, currency, coverage, and
 
 ## Decision
 
-Candidate data cannot enter benchmark results. Require validated selected-series metadata, checksums, and matching reference evidence; reject invalid inputs instead of weakening the contract. The synthetic demo requires explicit opt-in and retains its non-market identity. [Data tests](../../tests/test_market_data.py) and [demo tests](../../tests/test_demo.py) are the executable acceptance evidence.
+Candidate data cannot enter benchmark results. Require validated selected-series metadata, checksums, and matching reference evidence; reject invalid inputs instead of weakening the contract. The synthetic sample requires explicit opt-in and retains its non-market identity. [Data tests](../../tests/test_market_data.py) and [sample tests](../../tests/test_demo.py) are the executable acceptance evidence.
 
 ## Consequences
 

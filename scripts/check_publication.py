@@ -17,6 +17,10 @@ FORBIDDEN_FILENAMES = {
     "2026-09-20-investor-context-and-benchmarks.md",
 }
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+POSITIONING_LANGUAGE = re.compile(
+    r"\b(?:AI(?:[- ]assisted)?|showcases?|recruiters?|interviews?)\b",
+    re.IGNORECASE,
+)
 
 
 def tracked_paths(root: Path) -> list[Path]:
@@ -48,6 +52,10 @@ def audit_tree(root: Path, paths: Sequence[Path]) -> list[str]:
             violations.append(f"absolute user path: {relative.as_posix()}")
         if file_uri_pattern in text:
             violations.append(f"file URI: {relative.as_posix()}")
+        if relative == Path("README.md") or (relative.parts and relative.parts[0] == "docs"):
+            matches = sorted({match.group(0) for match in POSITIONING_LANGUAGE.finditer(text)}, key=str.casefold)
+            if matches:
+                violations.append(f"positioning language in {relative.as_posix()}: {', '.join(matches)}")
         if relative.suffix.lower() == ".md":
             for target in MARKDOWN_LINK.findall(text):
                 clean = target.split("#", 1)[0]

@@ -2,7 +2,7 @@
 
 This is research software, not investment advice. Its outputs explain calculations under explicit assumptions; they are not personalized recommendations or promises of future performance.
 
-## Public Demo
+## Bundled Sample
 
 All demo return, FX, inflation, and reference values are repository-authored synthetic values, not market history. Date labels and market-like conventions do not make them observed historical data. The [deterministic generator](../scripts/generate_demo_bundle.py), [manifest](../examples/demo/manifest.json), and [demo data license](../examples/demo/DATA_LICENSE.md) establish their origin.
 
@@ -34,4 +34,4 @@ The optimizer accepts supplied return tables and performs a heuristic search; be
 
 Taxes, live trading, account feasibility, and personalized recommendations are outside scope. The product does not determine brokerage eligibility, transferability, account-specific restrictions, or whether a portfolio is suitable for an individual. A web application, live execution service, and hosted account system are also outside this repository's current product boundary.
 
-For the engineering rationale, see [architecture](architecture.md), [source qualification decisions](decisions/002-fail-closed-data-qualification.md), and [AI validation evidence](ai-assisted-development.md).
+For the engineering rationale, see [architecture](architecture.md), [evaluation](evaluation.md), and the [data qualification decision](decisions/001-fail-closed-data-qualification.md).
