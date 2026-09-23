@@ -18,8 +18,22 @@ FORBIDDEN_FILENAMES = {
 }
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 POSITIONING_LANGUAGE = re.compile(
-    r"\b(?:AI(?:[- ]assisted)?|showcases?|recruiters?|interviews?)\b",
-    re.IGNORECASE,
+    r"""
+    \b(?:
+        AI(?:[- ]assisted)?
+        | showcases?
+        | recruiters?
+        | interviews?
+        | portfolio[- ]pieces?
+        | hiring[- ](?:managers?|reviewers?)
+        | (?:(?:resume|resumé|résumé)|(?-i:CV))[- ]
+          (?:oriented|ready|focused|worthy|projects?|pieces?|showcases?|bullets?)
+        | (?:on|for)\s+(?:(?:an?|the|your|my|their)\s+)?
+          (?:(?:resume|resumé|résumé)|(?-i:CV))
+        | (?:resumé|résumé)s?
+    )\b
+    """,
+    re.IGNORECASE | re.VERBOSE,
 )
 
 

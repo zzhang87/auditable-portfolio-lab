@@ -5,6 +5,45 @@ from pcopt.metrics import MetricConfig
 from pcopt.optimizer import GeneticOptimizer
 
 
+def test_cli_optimize_creates_database_parent_in_fresh_checkout(monkeypatch, tmp_path):
+    from pcopt import cli
+
+    checkout = tmp_path / "fresh-checkout"
+    examples = checkout / "examples"
+    examples.mkdir(parents=True)
+    (examples / "sample_annual_real_returns.csv").write_text(
+        "year,steady,growth,cash\n2020,0.03,0.10,0.01\n2021,0.02,-0.05,0.01\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(checkout)
+    assert not (checkout / "data").exists()
+
+    args = cli.build_parser().parse_args(
+        [
+            "optimize",
+            "--returns",
+            "examples/sample_annual_real_returns.csv",
+            "--assets",
+            "steady,growth,cash",
+            "--objective",
+            "cagr=1",
+            "--population-size",
+            "4",
+            "--generations",
+            "1",
+            "--seed",
+            "7",
+            "--db",
+            "data/portfolio_versions.sqlite3",
+        ]
+    )
+
+    payload = cli.run_optimize(args)
+
+    assert payload["version_id"] == 1
+    assert (checkout / "data" / "portfolio_versions.sqlite3").is_file()
+
+
 def test_cli_persists_final_result_to_database(tmp_path):
     from pcopt import cli
     from pcopt.storage import get_optimizer_run, get_portfolio_version, open_database

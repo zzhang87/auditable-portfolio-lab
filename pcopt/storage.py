@@ -11,7 +11,9 @@ def _configure_connection(conn: sqlite3.Connection) -> sqlite3.Connection:
 
 
 def open_database(path: str | Path) -> sqlite3.Connection:
-    return _configure_connection(sqlite3.connect(Path(path)))
+    db_path = Path(path)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    return _configure_connection(sqlite3.connect(db_path))
 
 
 def open_database_readonly(path: str | Path) -> sqlite3.Connection:

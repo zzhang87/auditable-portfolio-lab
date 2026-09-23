@@ -71,6 +71,20 @@ def _create_lineage_fixture(db_path):
     }
 
 
+def test_open_database_creates_only_the_requested_parent_directory(tmp_path):
+    from pcopt.storage import open_database
+
+    db_path = tmp_path / "selected" / "nested" / "versions.sqlite3"
+    unrelated = tmp_path / "unrelated"
+
+    conn = open_database(db_path)
+    conn.close()
+
+    assert db_path.is_file()
+    assert db_path.parent.is_dir()
+    assert not unrelated.exists()
+
+
 def test_initialize_database_creates_expected_tables(tmp_path):
     from pcopt.storage import initialize_database, open_database
 
