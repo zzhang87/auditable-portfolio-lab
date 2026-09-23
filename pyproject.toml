@@ -26,6 +26,9 @@ viz = [
   "matplotlib>=3.9",
 ]
 
+[tool.setuptools.packages.find]
+include = ["pcopt*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
